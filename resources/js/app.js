@@ -69,20 +69,32 @@ if (!semMovimento && 'IntersectionObserver' in window && contadores.length) {
         return `${el.dataset.prefixo || ''}${texto}${el.dataset.sufixo || ''}`;
     };
 
+    const finais = new Map();
+    const concluir = (el) => {
+        el.textContent = finais.get(el);
+        el.dataset.concluido = '1';
+    };
+
     const animar = (el) => {
         const final = Number(el.dataset.contar);
         const duracao = 1400;
         const inicio = performance.now();
 
         const passo = (agora) => {
+            if (el.dataset.concluido) return;
             const t = Math.min(1, (agora - inicio) / duracao);
             const suave = 1 - Math.pow(1 - t, 3);
             el.textContent = formatar(el, final * suave);
             if (t < 1) requestAnimationFrame(passo);
+            else concluir(el);
         };
 
         requestAnimationFrame(passo);
+        // Se a aba estiver em segundo plano, o navegador pausa a animação: garante o valor final.
+        setTimeout(() => concluir(el), duracao + 300);
     };
+
+    window.addEventListener('beforeprint', () => contadores.forEach(concluir));
 
     const observador = new IntersectionObserver((entradas) => {
         entradas.forEach((entrada) => {
@@ -93,6 +105,7 @@ if (!semMovimento && 'IntersectionObserver' in window && contadores.length) {
     }, { threshold: 0.4 });
 
     contadores.forEach((el) => {
+        finais.set(el, el.textContent);
         el.setAttribute('aria-label', el.textContent);
         observador.observe(el);
     });

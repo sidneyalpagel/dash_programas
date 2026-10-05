@@ -1,39 +1,67 @@
 @php
     use App\Enums\Mecanismo;
-    use App\Enums\PublicoAlvo;
     use App\Support\Formato;
 
     $titulo = $filtros['perfil']
         ? 'Programas para: '.$filtros['perfil']->getLabel()
-        : ($filtros['secretaria'] ? $filtros['secretaria']->nome : 'Todos os programas');
+        : ($filtros['secretaria'] ? $filtros['secretaria']->nome_curto : 'Todos os programas');
+
+    $subtitulo = $filtros['secretaria']?->apresentacao
+        ?? 'Escolha um perfil ou use os filtros para encontrar os programas que fazem sentido para você.';
+
+    $totalResultado = (float) $programas->sum('valor');
+    $secretariasResultado = $programas->pluck('secretaria_id')->unique()->count();
+    $comCustoResultado = $programas->filter->temCustoDireto()->count();
+
+    $urlPerfil = fn (?string $perfil) => route('programas.index', array_filter([
+        'perfil' => $perfil,
+        'secretaria' => $filtros['secretaria']?->slug,
+        'tipo' => $filtros['tipo']?->value,
+        'busca' => $filtros['busca'] ?: null,
+        'ordem' => $ordem !== 'nome' ? $ordem : null,
+    ]));
 @endphp
 
-<x-layouts.site :titulo="$titulo" :panorama="$panorama">
-    <div class="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
-        <h1 class="text-3xl font-semibold">{{ $titulo }}</h1>
-        @if ($filtros['secretaria']?->apresentacao)
-            <p class="mt-2 max-w-3xl text-lg text-ink-2">{{ $filtros['secretaria']->apresentacao }}</p>
-        @endif
-
-        {{-- Perfis -------------------------------------------------------- --}}
-        <nav aria-label="Filtrar por perfil" class="mt-6">
-            <p class="text-sm font-medium text-ink-2">Para quem?</p>
-            <ul class="mt-2 flex flex-wrap gap-2">
-                <li>
-                    <a href="{{ route('programas.index', array_filter(['secretaria' => $filtros['secretaria']?->slug, 'tipo' => $filtros['tipo']?->value])) }}"
-                       class="chip" aria-current="{{ $filtros['perfil'] ? 'false' : 'true' }}">Todos</a>
-                </li>
+<x-layouts.site :titulo="$titulo" :panorama="$panorama" :faixa="false">
+    <x-cabecalho-pagina :titulo="$titulo" :subtitulo="$subtitulo" :sobretitulo="'Exercício '.$panorama->exercicio">
+        {{-- Perfis --}}
+        <nav aria-label="Filtrar por perfil" class="mt-8">
+            <p class="text-sm font-semibold tracking-wide text-white/80 uppercase">Para quem?</p>
+            <ul class="mt-3 flex flex-wrap gap-2">
+                <li><a href="{{ $urlPerfil(null) }}" class="chip chip-claro" aria-current="{{ $filtros['perfil'] ? 'false' : 'true' }}">Todos</a></li>
                 @foreach ($panorama->perfis() as $item)
                     <li>
-                        <a href="{{ route('programas.index', array_filter(['perfil' => $item['perfil']->value, 'secretaria' => $filtros['secretaria']?->slug, 'tipo' => $filtros['tipo']?->value])) }}"
-                           class="chip" aria-current="{{ $filtros['perfil'] === $item['perfil'] ? 'true' : 'false' }}">{{ $item['perfil']->getLabel() }}</a>
+                        <a href="{{ $urlPerfil($item['perfil']->value) }}" class="chip chip-claro"
+                           aria-current="{{ $filtros['perfil'] === $item['perfil'] ? 'true' : 'false' }}">{{ $item['perfil']->getLabel() }}</a>
                     </li>
                 @endforeach
             </ul>
         </nav>
 
-        {{-- Demais filtros ------------------------------------------------ --}}
-        <form method="get" action="{{ route('programas.index') }}" class="card mt-6 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4" role="search">
+        {{-- Resultado em números --}}
+        <div class="mt-10 grid gap-4 sm:grid-cols-3" aria-live="polite">
+            <x-cartao-heroi :rotulo="$programas->count() === 1 ? 'programa encontrado' : 'programas encontrados'"
+                            :detalhe="$filtrado ? 'de '.$panorama->quantidade().' no total' : null">
+                <x-numero-animado :valor="$programas->count()" />
+            </x-cartao-heroi>
+            <x-cartao-heroi rotulo="destinados no ano"
+                            :detalhe="$filtrado && $panorama->total() > 0 ? Formato::percentual($totalResultado / $panorama->total()).' do total do Município' : 'soma dos programas com custo direto'">
+                @if ($totalResultado >= 1_000_000)
+                    <x-numero-animado :valor="round($totalResultado / 1_000_000, 1)" :casas="1" prefixo="R$ " /><span class="text-2xl font-bold sm:text-3xl"> mi</span>
+                @else
+                    {{ Formato::moedaCurta($totalResultado) }}
+                @endif
+            </x-cartao-heroi>
+            <x-cartao-heroi :rotulo="$secretariasResultado === 1 ? 'secretaria responsável' : 'secretarias responsáveis'"
+                            :detalhe="($programas->count() - $comCustoResultado).' sem custo direto ao Município'">
+                <x-numero-animado :valor="$secretariasResultado" />
+            </x-cartao-heroi>
+        </div>
+    </x-cabecalho-pagina>
+
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        {{-- Demais filtros --}}
+        <form method="get" action="{{ route('programas.index') }}" class="card relative z-10 -mt-6 grid gap-4 p-4 shadow-lg shadow-black/5 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto] lg:items-end" role="search">
             @if ($filtros['perfil'])
                 <input type="hidden" name="perfil" value="{{ $filtros['perfil']->value }}">
             @endif
@@ -67,27 +95,29 @@
                     <option value="valor" @selected($ordem === 'valor')>Maior valor</option>
                 </select>
             </label>
-            <div class="flex flex-wrap items-center gap-3 sm:col-span-2 lg:col-span-4">
+            <div class="flex items-center gap-3">
                 <button type="submit" class="rounded-lg bg-brand px-4 py-2 font-semibold text-white hover:bg-brand-2">Filtrar</button>
                 @if ($filtrado)
-                    <a href="{{ route('programas.index') }}" class="text-sm">Limpar filtros</a>
+                    <a href="{{ route('programas.index') }}" class="text-sm whitespace-nowrap">Limpar</a>
                 @endif
             </div>
         </form>
 
-        {{-- Resumo do resultado ------------------------------------------- --}}
-        <p class="mt-6 text-ink-2" aria-live="polite">
-            @if ($programas->isEmpty())
-                Nenhum programa encontrado com esses filtros.
-            @else
-                <strong class="text-ink">{{ $programas->count() }} {{ $programas->count() === 1 ? 'programa' : 'programas' }}</strong>
-                @if ($programas->sum('valor') > 0)
-                    · {{ Formato::moeda($programas->sum('valor')) }} no ano
+        <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
+            <p class="text-ink-2">
+                @if ($programas->isEmpty())
+                    Nenhum programa encontrado com esses filtros. <a href="{{ route('programas.index') }}">Ver todos</a>.
+                @else
+                    <strong class="text-ink">{{ $programas->count() }} {{ $programas->count() === 1 ? 'programa' : 'programas' }}</strong>
+                    @if ($totalResultado > 0)
+                        · {{ Formato::moeda($totalResultado) }} no ano
+                    @endif
                 @endif
-            @endif
-        </p>
+            </p>
+            <x-legenda-mecanismos />
+        </div>
 
-        <ul class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($programas as $programa)
                 <li><x-programa-card :programa="$programa" /></li>
             @endforeach

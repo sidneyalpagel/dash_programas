@@ -154,6 +154,6 @@ class FluxoPublicacaoTest extends TestCase
             ->callAction('publicar');
 
         $this->assertSame(StatusPrograma::Publicado, $programa->refresh()->status);
-        $this->get('/programas/programa-de-teste-rural')->assertOk()->assertSee('R$ 250 mil');
+        $this->get('/programas/programa-de-teste-rural')->assertOk()->assertSee('R$ 250.000,00');
     }
 }

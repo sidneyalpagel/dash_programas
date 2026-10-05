@@ -191,6 +191,25 @@
         color: var(--brand-ink);
     }
 
+    /* Chips sobre o fundo azul da abertura. */
+    .chip-claro {
+        background: rgb(255 255 255 / .1);
+        border-color: rgb(255 255 255 / .25);
+        color: #fff;
+    }
+
+    .chip-claro:hover {
+        background: rgb(255 255 255 / .18);
+        border-color: rgb(255 255 255 / .5);
+    }
+
+    .chip-claro[aria-current='true'] {
+        background: var(--gold);
+        border-color: var(--gold);
+        color: #15171c;
+        font-weight: 600;
+    }
+
     .tabela {
         width: 100%;
         border-collapse: collapse;

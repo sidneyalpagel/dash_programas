@@ -102,7 +102,21 @@ class Panorama
     /** @return Collection<int, Programa> */
     public function maiores(int $quantos = 10): Collection
     {
-        return $this->programas->filter->temCustoDireto()->sortByDesc('valor')->take($quantos)->values();
+        return $this->comCusto()->take($quantos);
+    }
+
+    /** Programas com custo direto, do maior para o menor valor. */
+    public function comCusto(): Collection
+    {
+        return $this->programas->filter->temCustoDireto()->sortByDesc('valor')->values();
+    }
+
+    /** Posição do programa entre os que têm custo direto (1 = maior), ou null. */
+    public function posicao(Programa $programa): ?int
+    {
+        $indice = $this->comCusto()->search(fn (Programa $p) => $p->is($programa));
+
+        return $indice === false ? null : $indice + 1;
     }
 
     /**
