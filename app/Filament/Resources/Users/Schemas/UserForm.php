@@ -45,7 +45,7 @@ class UserForm
                             ->label(fn (string $operation) => $operation === 'create' ? 'Senha' : 'Nova senha (deixe em branco para manter)')
                             ->password()
                             ->revealable()
-                            ->rule(Password::min(10))
+                            ->rule(Password::min(8))
                             ->required(fn (string $operation) => $operation === 'create')
                             ->dehydrated(fn (?string $state) => filled($state))
                             ->columnSpanFull(),

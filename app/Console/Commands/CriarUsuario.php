@@ -24,7 +24,7 @@ class CriarUsuario extends Command
             ['email' => $valor],
             ['email' => 'email|unique:users,email'],
         )->errors()->first('email') ?: null);
-        $senha = password('Senha (mínimo 10 caracteres)', required: true, validate: fn (string $valor) => strlen($valor) < 10 ? 'Use pelo menos 10 caracteres.' : null);
+        $senha = password('Senha (mínimo 8 caracteres)', required: true, validate: fn (string $valor) => strlen($valor) < 8 ? 'Use pelo menos 8 caracteres.' : null);
 
         $secretariaId = null;
 
