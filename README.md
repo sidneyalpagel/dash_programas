@@ -77,11 +77,15 @@ e `public_html` apontando para `private/dash_programas/public`, funciona sem alt
 
 ### Usuários do painel
 
-```bash
-ssh -t root@192.168.0.23 'su - programas -c "cd ~/web/programas.santahelena.pr.gov.br/private/dash_programas && php8.4 artisan usuarios:criar --admin"'
-```
+Os **servidores das secretarias são cadastrados no painel**, pelo administrador: *Administração → Usuários → Novo usuário*
+(nome, e-mail, secretaria e senha). O servidor só vê e edita os programas da secretaria escolhida.
+Para alterar a senha de alguém, edite o usuário e preencha "Nova senha".
 
-Sem `--admin`, o comando pergunta a secretaria do servidor. Também é possível criar usuários pelo painel (*Administração → Usuários*).
+O terminal é usado só para criar **administradores** (necessário para o primeiro acesso). Logado como root no `192.168.0.23`:
+
+```bash
+su - programas -c "cd ~/web/programas.santahelena.pr.gov.br/private/dash_programas && php8.4 artisan usuarios:criar"
+```
 
 ### Pontos de atenção
 
@@ -95,7 +99,7 @@ Sem `--admin`, o comando pergunta a secretaria do servidor. Também é possível
 2. MySQL: `CREATE DATABASE programas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` e um usuário com `GRANT ALL ON programas.*` só para o IP do servidor web.
 3. Como `programas`: clonar em `~/web/<domínio>/private/dash_programas`, `php8.4 /usr/bin/composer install --no-dev -o`, copiar `.env.example` para `.env` (APP_ENV=production, APP_DEBUG=false, APP_URL, DB_*), `php8.4 artisan key:generate`.
 4. Como root: substituir `public_html` por um link `public_html -> private/dash_programas/public` (`chown -h programas:www-data public_html`).
-5. `php8.4 artisan migrate --force`, `php8.4 artisan db:seed --force` (secretarias + 42 programas do PDF), `usuarios:criar --admin`, `optimize`, `filament:optimize`.
+5. `php8.4 artisan migrate --force`, `php8.4 artisan db:seed --force` (secretarias + 42 programas do PDF), `usuarios:criar` (administrador), `optimize`, `filament:optimize`.
 6. SSL: `v-add-web-domain-ssl` com o wildcard e `v-add-web-domain-ssl-force`.
 
 Os arquivos de `public/build` (CSS/JS do site) vêm compilados no repositório, então **o servidor não precisa de Node**.

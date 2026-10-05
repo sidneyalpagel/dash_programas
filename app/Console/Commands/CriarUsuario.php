@@ -2,20 +2,22 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Secretaria;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 
 use function Laravel\Prompts\password;
-use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
+/**
+ * Cria um administrador pelo terminal (necessário para o primeiro acesso).
+ * Os servidores das secretarias são cadastrados no painel, em Administração → Usuários.
+ */
 class CriarUsuario extends Command
 {
-    protected $signature = 'usuarios:criar {--admin : Cria um administrador (revisa e publica tudo)}';
+    protected $signature = 'usuarios:criar {--admin : Mantido por compatibilidade; o comando sempre cria administrador}';
 
-    protected $description = 'Cria um usuário do painel: administrador ou servidor de uma secretaria';
+    protected $description = 'Cria um administrador do painel (servidores das secretarias são cadastrados no painel)';
 
     public function handle(): int
     {
@@ -26,21 +28,14 @@ class CriarUsuario extends Command
         )->errors()->first('email') ?: null);
         $senha = password('Senha (mínimo 8 caracteres)', required: true, validate: fn (string $valor) => strlen($valor) < 8 ? 'Use pelo menos 8 caracteres.' : null);
 
-        $secretariaId = null;
-
-        if (! $this->option('admin')) {
-            $secretariaId = select('Secretaria', Secretaria::pluck('nome', 'id')->all());
-        }
-
         User::create([
             'name' => $nome,
             'email' => $email,
             'password' => $senha,
-            'is_admin' => (bool) $this->option('admin'),
-            'secretaria_id' => $secretariaId,
+            'is_admin' => true,
         ]);
 
-        $this->info("Usuário {$email} criado.");
+        $this->info("Administrador {$email} criado. Cadastre os servidores das secretarias no painel, em Administração → Usuários.");
 
         return self::SUCCESS;
     }

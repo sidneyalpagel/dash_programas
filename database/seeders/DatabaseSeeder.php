@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
             ProgramaSeeder::class,
         ]);
 
-        // Usuários de teste, só no ambiente local. Em produção use:
-        // php artisan usuarios:criar
+        // Usuários de teste, só no ambiente local. Em produção, o administrador é criado com
+        // php artisan usuarios:criar e os servidores das secretarias são cadastrados no painel.
         if (app()->environment('local')) {
             User::updateOrCreate(['email' => 'admin@santahelena.test'], [
                 'name' => 'Administrador (teste)',
