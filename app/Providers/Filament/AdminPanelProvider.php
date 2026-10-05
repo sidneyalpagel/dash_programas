@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\EditProfile;
+use App\Filament\Auth\Login;
 use App\Filament\Widgets\FichasIncompletas;
 use App\Filament\Widgets\GuiaRapido;
 use App\Filament\Widgets\ResumoProgramas;
@@ -30,9 +32,9 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(Login::class)
             ->passwordReset()
-            ->profile()
+            ->profile(EditProfile::class)
             ->brandName('Programas Municipais · Painel')
             ->colors([
                 'primary' => Color::hex('#1d3a6b'),

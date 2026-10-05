@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Auth\Login;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Secretaria;
@@ -34,14 +35,14 @@ class UsuariosTest extends TestCase
         Livewire::test(CreateUser::class)
             ->fillForm([
                 'name' => 'Servidora da Educação',
-                'email' => 'educacao@exemplo.test',
+                'username' => 'servidora.educacao',
                 'secretaria_id' => $educacao->id,
                 'password' => 'senha123',
             ])
             ->call('create')
             ->assertHasNoFormErrors();
 
-        $usuario = User::where('email', 'educacao@exemplo.test')->first();
+        $usuario = User::where('username', 'servidora.educacao')->first();
 
         $this->assertFalse($usuario->isAdmin());
         $this->assertTrue($usuario->secretaria->is($educacao));
@@ -55,7 +56,7 @@ class UsuariosTest extends TestCase
         Livewire::test(CreateUser::class)
             ->fillForm([
                 'name' => 'Sem secretaria',
-                'email' => 'sem@exemplo.test',
+                'username' => 'sem.secretaria',
                 'password' => 'senha123',
             ])
             ->call('create')
@@ -72,14 +73,39 @@ class UsuariosTest extends TestCase
         $this->get(UserResource::getUrl('create'))->assertForbidden();
     }
 
+    public function test_login_e_feito_pelo_nome_de_usuario(): void
+    {
+        $usuario = User::factory()->create([
+            'username' => 'maria.silva',
+            'email' => 'maria@exemplo.test',
+            'password' => 'senha123',
+            'secretaria_id' => Secretaria::where('slug', 'educacao')->value('id'),
+        ]);
+
+        Livewire::test(Login::class)
+            ->fillForm(['username' => 'maria@exemplo.test', 'password' => 'senha123'])
+            ->call('authenticate')
+            ->assertHasFormErrors(['username']);
+
+        $this->assertGuest();
+
+        Livewire::test(Login::class)
+            ->fillForm(['username' => ' Maria.Silva ', 'password' => 'senha123'])
+            ->call('authenticate')
+            ->assertHasNoFormErrors();
+
+        $this->assertAuthenticatedAs($usuario);
+    }
+
     public function test_comando_cria_somente_administrador(): void
     {
         $this->artisan('usuarios:criar')
             ->expectsQuestion('Nome', 'Admin')
-            ->expectsQuestion('E-mail', 'admin@exemplo.test')
+            ->expectsQuestion('Usuário (para entrar no painel)', 'Joao.Admin')
+            ->expectsQuestion('E-mail (opcional, para recuperar a senha)', '')
             ->expectsQuestion('Senha (mínimo 8 caracteres)', 'senha123')
             ->assertSuccessful();
 
-        $this->assertTrue(User::where('email', 'admin@exemplo.test')->first()->isAdmin());
+        $this->assertTrue(User::where('username', 'joao.admin')->first()->isAdmin());
     }
 }

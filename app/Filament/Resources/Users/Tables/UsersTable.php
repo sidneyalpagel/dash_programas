@@ -14,7 +14,8 @@ class UsersTable
         return $table
             ->columns([
                 TextColumn::make('name')->label('Nome')->searchable()->sortable(),
-                TextColumn::make('email')->label('E-mail')->searchable(),
+                TextColumn::make('username')->label('Usuário')->searchable()->sortable(),
+                TextColumn::make('email')->label('E-mail')->searchable()->placeholder('—')->toggleable(),
                 TextColumn::make('secretaria.nome_curto')->label('Secretaria')->placeholder('—'),
                 IconColumn::make('is_admin')->label('Administrador')->boolean(),
                 TextColumn::make('created_at')->label('Criado em')->date('d/m/Y')->sortable(),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Support\NomeUsuario;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -24,12 +25,14 @@ class UserForm
                             ->label('Nome')
                             ->required()
                             ->maxLength(255),
+                        NomeUsuario::campo(),
                         TextInput::make('email')
-                            ->label('E-mail')
+                            ->label('E-mail (opcional)')
+                            ->helperText('Usado apenas para recuperar a senha.')
                             ->email()
-                            ->required()
                             ->unique(ignoreRecord: true)
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->columnSpanFull(),
                         Toggle::make('is_admin')
                             ->label('Administrador')
                             ->helperText('Revisa, publica e gerencia secretarias e usuários.')

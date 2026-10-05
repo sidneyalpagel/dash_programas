@@ -43,7 +43,7 @@ npm install && npm run build
 php artisan serve
 ```
 
-No ambiente `local`, o seeder cria usuários de teste com senha `password`:
+`admin` (administrador) e um usuário por secretaria
 `admin@santahelena.test` (administrador) e `<secretaria>@santahelena.test`
 (`agricultura`, `desenvolvimento-economico`, `esportes`, `assistencia-social`, `educacao`).
 
@@ -78,7 +78,7 @@ e `public_html` apontando para `private/dash_programas/public`, funciona sem alt
 ### Usuários do painel
 
 Os **servidores das secretarias são cadastrados no painel**, pelo administrador: *Administração → Usuários → Novo usuário*
-(nome, e-mail, secretaria e senha). O servidor só vê e edita os programas da secretaria escolhida.
+(nome, usuário, secretaria, senha e, opcionalmente, e-mail). O login é feito pelo **nome de usuário**. O servidor só vê e edita os programas da secretaria escolhida.
 Para alterar a senha de alguém, edite o usuário e preencha "Nova senha".
 
 O terminal é usado só para criar **administradores** (necessário para o primeiro acesso). Logado como root no `192.168.0.23`:

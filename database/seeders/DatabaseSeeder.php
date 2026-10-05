@@ -21,14 +21,14 @@ class DatabaseSeeder extends Seeder
         // Usuários de teste, só no ambiente local. Em produção, o administrador é criado com
         // php artisan usuarios:criar e os servidores das secretarias são cadastrados no painel.
         if (app()->environment('local')) {
-            User::updateOrCreate(['email' => 'admin@santahelena.test'], [
+            User::updateOrCreate(['username' => 'admin'], [
                 'name' => 'Administrador (teste)',
                 'password' => 'password',
                 'is_admin' => true,
             ]);
 
             foreach (Secretaria::all() as $secretaria) {
-                User::updateOrCreate(['email' => $secretaria->slug.'@santahelena.test'], [
+                User::updateOrCreate(['username' => $secretaria->slug], [
                     'name' => $secretaria->nome_curto.' (teste)',
                     'password' => 'password',
                     'secretaria_id' => $secretaria->id,

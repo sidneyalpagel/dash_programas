@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Support\NomeUsuario;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 
@@ -22,20 +23,26 @@ class CriarUsuario extends Command
     public function handle(): int
     {
         $nome = text('Nome', required: true);
-        $email = text('E-mail', required: true, validate: fn (string $valor) => Validator::make(
+        $usuario = mb_strtolower(trim(text('Usuário (para entrar no painel)', required: true, validate: fn (string $valor) => Validator::make(
+            ['username' => mb_strtolower(trim($valor))],
+            ['username' => ['min:3', 'max:60', 'regex:'.NomeUsuario::REGRA, 'unique:users,username']],
+            ['username.regex' => 'Use letras minúsculas, números, ponto, hífen ou sublinhado.'],
+        )->errors()->first('username') ?: null)));
+        $email = text('E-mail (opcional, para recuperar a senha)', validate: fn (string $valor) => $valor === '' ? null : (Validator::make(
             ['email' => $valor],
             ['email' => 'email|unique:users,email'],
-        )->errors()->first('email') ?: null);
+        )->errors()->first('email') ?: null));
         $senha = password('Senha (mínimo 8 caracteres)', required: true, validate: fn (string $valor) => strlen($valor) < 8 ? 'Use pelo menos 8 caracteres.' : null);
 
         User::create([
             'name' => $nome,
-            'email' => $email,
+            'username' => $usuario,
+            'email' => $email ?: null,
             'password' => $senha,
             'is_admin' => true,
         ]);
 
-        $this->info("Administrador {$email} criado. Cadastre os servidores das secretarias no painel, em Administração → Usuários.");
+        $this->info("Administrador \"{$usuario}\" criado. Cadastre os servidores das secretarias no painel, em Administração → Usuários.");
 
         return self::SUCCESS;
     }
