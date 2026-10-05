@@ -43,8 +43,8 @@ npm install && npm run build
 php artisan serve
 ```
 
+No ambiente `local`, o seeder cria usuários de teste com senha `password`:
 `admin` (administrador) e um usuário por secretaria
-`admin@santahelena.test` (administrador) e `<secretaria>@santahelena.test`
 (`agricultura`, `desenvolvimento-economico`, `esportes`, `assistencia-social`, `educacao`).
 
 Testes: `php artisan test`
