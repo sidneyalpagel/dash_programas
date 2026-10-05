@@ -2,24 +2,38 @@
 
 namespace Database\Seeders;
 
+use App\Models\Secretaria;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            SecretariaSeeder::class,
+            ProgramaSeeder::class,
         ]);
+
+        // Usuários de teste, só no ambiente local. Em produção use:
+        // php artisan usuarios:criar
+        if (app()->environment('local')) {
+            User::updateOrCreate(['email' => 'admin@santahelena.test'], [
+                'name' => 'Administrador (teste)',
+                'password' => 'password',
+                'is_admin' => true,
+            ]);
+
+            foreach (Secretaria::all() as $secretaria) {
+                User::updateOrCreate(['email' => $secretaria->slug.'@santahelena.test'], [
+                    'name' => $secretaria->nome_curto.' (teste)',
+                    'password' => 'password',
+                    'secretaria_id' => $secretaria->id,
+                ]);
+            }
+        }
     }
 }
