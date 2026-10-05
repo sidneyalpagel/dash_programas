@@ -75,6 +75,13 @@ class Programa extends Model
                 $programa->slug = static::slugUnico($programa->nome);
             }
 
+            // Listas vazias viram null para que "falta preencher" seja só whereNull.
+            foreach (['bases_legais', 'publico_alvo'] as $campo) {
+                if ($programa->{$campo} === []) {
+                    $programa->{$campo} = null;
+                }
+            }
+
             $programa->calcularValor();
 
             if (Auth::check()) {
@@ -186,6 +193,83 @@ class Programa extends Model
         return $query->whereJsonContains('publico_alvo', $perfil->value);
     }
 
+    // Fluxo de publicação -----------------------------------------------
+
+    /**
+     * Guarda as alterações de um programa já publicado sem mexer no que o
+     * cidadão vê. Elas só entram no ar quando o administrador aprova.
+     */
+    public function proporAlteracoes(array $dados): void
+    {
+        $proposta = [];
+
+        foreach (self::CAMPOS_CONTEUDO as $campo) {
+            if (array_key_exists($campo, $dados)) {
+                $valor = $dados[$campo];
+                $proposta[$campo] = $valor instanceof \BackedEnum ? $valor->value : $valor;
+            }
+        }
+
+        $this->alteracoes_pendentes = $proposta;
+        $this->saveQuietly();
+        $this->registrarHistorico('alteração proposta', $this->diferencasPropostas());
+    }
+
+    /** Campos em que a proposta difere da versão publicada: [campo => [de, para]]. */
+    public function diferencasPropostas(): array
+    {
+        if (! $this->temAlteracaoPendente()) {
+            return [];
+        }
+
+        $diferencas = [];
+
+        foreach ($this->alteracoes_pendentes as $campo => $novo) {
+            $atual = $this->getAttribute($campo);
+            $atual = $atual instanceof \BackedEnum ? $atual->value : $atual;
+
+            if (in_array($campo, ['valor', 'valor_total_vigencia'], true)) {
+                $iguais = round((float) $atual, 2) === round((float) $novo, 2) && ($atual === null) === ($novo === null);
+            } else {
+                $iguais = json_encode($atual) === json_encode($novo) || ((string) $atual === (string) $novo && ! is_array($novo));
+            }
+
+            if (! $iguais) {
+                $diferencas[$campo] = ['de' => $atual, 'para' => $novo];
+            }
+        }
+
+        return $diferencas;
+    }
+
+    public function aprovarAlteracoes(): void
+    {
+        $this->fill($this->alteracoes_pendentes ?? []);
+        $this->alteracoes_pendentes = null;
+        $this->publicado_em = now();
+        $this->acaoHistorico = 'alteração aprovada';
+        $this->save();
+    }
+
+    public function descartarAlteracoes(): void
+    {
+        $this->alteracoes_pendentes = null;
+        $this->saveQuietly();
+        $this->registrarHistorico('alteração descartada');
+    }
+
+    public function mudarStatus(StatusPrograma $status, string $acao): void
+    {
+        $this->status = $status;
+
+        if ($status === StatusPrograma::Publicado) {
+            $this->publicado_em = now();
+        }
+
+        $this->acaoHistorico = $acao;
+        $this->save();
+    }
+
     // Regras de leitura --------------------------------------------------
 
     public function temAlteracaoPendente(): bool
@@ -253,6 +337,22 @@ class Programa extends Model
         }
 
         return $faltando;
+    }
+
+    /** "2.434 estudantes", "1.139 benefícios pagos" ou "9 adolescentes · 47 benefícios". */
+    public function atendidosTexto(): ?string
+    {
+        $partes = [];
+
+        if ($this->qtd_atendidos !== null) {
+            $partes[] = number_format($this->qtd_atendidos, 0, ',', '.').' '.($this->unidade_atendidos ?: 'atendidos');
+        }
+
+        if ($this->qtd_beneficios !== null) {
+            $partes[] = number_format($this->qtd_beneficios, 0, ',', '.').' '.($this->qtd_beneficios === 1 ? 'benefício pago' : 'benefícios pagos');
+        }
+
+        return $partes ? implode(' · ', $partes) : null;
     }
 
     /** Leis em texto curto: "Lei nº 3.339/2025 e Lei nº 3.354/2025". */

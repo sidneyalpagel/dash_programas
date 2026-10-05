@@ -41,7 +41,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function isAdmin(): bool
     {
-        return $this->is_admin;
+        return (bool) $this->is_admin;
     }
 
     /** Administradores entram sempre; servidores só se estiverem vinculados a uma secretaria. */

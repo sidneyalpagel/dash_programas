@@ -2,16 +2,19 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\FichasIncompletas;
+use App\Filament\Widgets\GuiaRapido;
+use App\Filament\Widgets\ResumoProgramas;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -28,18 +31,29 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->passwordReset()
+            ->profile()
+            ->brandName('Programas Municipais · Painel')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::hex('#1d3a6b'),
+            ])
+            ->maxContentWidth('7xl')
+            ->sidebarCollapsibleOnDesktop()
+            ->navigationItems([
+                NavigationItem::make('Ver o site público')
+                    ->url('/', shouldOpenInNewTab: true)
+                    ->icon(Heroicon::OutlinedGlobeAlt)
+                    ->sort(99),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                ResumoProgramas::class,
+                GuiaRapido::class,
+                FichasIncompletas::class,
             ])
             ->middleware([
                 EncryptCookies::class,

@@ -1,58 +1,117 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Programas Municipais · Santa Helena - PR
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Site público que explica ao cidadão os programas da Prefeitura: quanto custam, quem atendem e como participar.
+As secretarias cadastram e atualizam os programas num painel com login, e o administrador revisa antes de publicar.
 
-## About Laravel
+- **Site público:** `/` (panorama), `/programas` (lista com filtros "para mim"), `/programas/{programa}` (ficha), `/entenda` (glossário e metodologia)
+- **Painel:** `/admin`
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Laravel 13 · Filament 5 · Tailwind 4 · MySQL/MariaDB (produção) ou SQLite (desenvolvimento).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Como funciona o fluxo
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Quem | Pode |
+|---|---|
+| **Servidor de secretaria** | Ver e editar só os programas da própria secretaria. Programa novo nasce como *rascunho* → "Enviar para revisão". Se o programa já está publicado, a edição vira uma **proposta**: o site continua mostrando a versão publicada até a aprovação. |
+| **Administrador** | Tudo. Revisa propostas campo a campo ("Revisar alterações" → aprovar ou descartar), publica, tira do site, gerencia secretarias e usuários. |
 
-## Learning Laravel
+Toda alteração fica registrada no **histórico** do programa (quem, quando, o quê).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+O painel mostra as **fichas a completar**: programas sem descrição, sem "como participar", sem base legal, sem público-alvo, sem quantidade atendida ou com fonte de recurso não informada.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Modelo de dados (resumo)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+Cada programa tem: exercício, secretaria, nome, grupo (programa-mãe, ex.: *Renda Santa Helena*), descrição, como participar,
+bases legais (tipo/número/ano/link), ano de criação, **mecanismo** (transferência de renda · bolsa/auxílio · incentivo produtivo · serviço público),
+públicos-alvo, fonte do recurso, **quantidade de atendidos + unidade** e **quantidade de benefícios** (separados), detalhamento,
+**tipo de valor** (anual · anualizado · sem custo direto), valor, valor total e vigência (para anualizados), nota pública e observação interna.
 
-## Agentic Development
+A carga inicial (`database/seeders/ProgramaSeeder.php`) reproduz os 42 programas do
+[demonstrativo consolidado de 2025](docs/consolidacao_programas_2025.pdf). Os totais batem com o PDF (R$ 60.136.552,72).
+Pendências encontradas no PDF ficaram registradas como *observação interna* nos programas afetados.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Desenvolvimento local
+
+Requisitos: PHP 8.3+ (o do Herd serve), Composer, Node 20+.
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+npm install && npm run build
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+No ambiente `local`, o seeder cria usuários de teste com senha `password`:
+`admin@santahelena.test` (administrador) e `<secretaria>@santahelena.test`
+(`agricultura`, `desenvolvimento-economico`, `esportes`, `assistencia-social`, `educacao`).
 
-## Contributing
+Testes: `php artisan test`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Instalação no servidor (HestiaCP)
 
-## Code of Conduct
+1. **Domínio:** em *Web*, adicione o domínio (ex.: `programas.santahelena.pr.gov.br`), ative SSL (Let's Encrypt)
+   e escolha o template **laravel** (Nginx) com PHP **8.3 ou superior**. Esse template aponta a raiz para `public_html/public`.
+   Se a sua versão do Hestia não tiver esse template, peça ao responsável pelo servidor que aponte a raiz do domínio para a pasta `public` do projeto.
+2. **Banco:** em *DB*, crie um banco MySQL/MariaDB e anote nome, usuário e senha (o Hestia prefixa com o nome do usuário).
+3. **Código** (via SSH, com o usuário do Hestia):
+   ```bash
+   cd ~/web/programas.santahelena.pr.gov.br
+   rm -rf public_html && git clone https://github.com/sidneyalpagel/dash_programas.git public_html
+   cd public_html
+   composer install --no-dev --optimize-autoloader
+   cp .env.example .env
+   php artisan key:generate
+   ```
+4. **Configuração** — edite o `.env`:
+   ```dotenv
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_URL=https://programas.santahelena.pr.gov.br
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   DB_CONNECTION=mysql
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_DATABASE=usuario_programas
+   DB_USERNAME=usuario_programas
+   DB_PASSWORD=...
 
-## Security Vulnerabilities
+   # Necessário para "Esqueceu sua senha?" funcionar
+   MAIL_MAILER=smtp
+   MAIL_HOST=...
+   MAIL_PORT=587
+   MAIL_USERNAME=...
+   MAIL_PASSWORD=...
+   MAIL_FROM_ADDRESS=nao-responda@santahelena.pr.gov.br
+   ```
+5. **Banco, dados iniciais e primeiro administrador:**
+   ```bash
+   php artisan migrate --force
+   php artisan db:seed --force          # secretarias + 42 programas do PDF
+   php artisan usuarios:criar --admin   # pede nome, e-mail e senha
+   php artisan optimize
+   php artisan filament:optimize
+   ```
+6. Crie os usuários das secretarias pelo painel (*Administração → Usuários*) ou com `php artisan usuarios:criar`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Os arquivos de `public/build` (CSS/JS do site) já vêm compilados no repositório, então **o servidor não precisa de Node**.
 
-## License
+### Atualizar o servidor
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+cd ~/web/programas.santahelena.pr.gov.br/public_html
+php artisan down
+git pull
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan optimize
+php artisan filament:optimize
+php artisan up
+```
+
+Se alterar CSS/JS ou as views do site, rode `npm run build` **na sua máquina** e faça commit de `public/build` antes do `git pull` no servidor.
+
+### Backup
+
+O backup do Hestia (*Backups*) já inclui os arquivos e o banco. Recomenda-se ativar o backup diário do usuário.

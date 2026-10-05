@@ -1,0 +1,133 @@
+<?php
+
+namespace App\Support;
+
+use App\Enums\Mecanismo;
+use App\Enums\PublicoAlvo;
+use App\Models\Programa;
+use App\Models\Secretaria;
+use Illuminate\Support\Collection;
+
+/**
+ * Números agregados de um exercício, calculados só com programas publicados.
+ */
+class Panorama
+{
+    /** @var Collection<int, Programa> */
+    public readonly Collection $programas;
+
+    public function __construct(public readonly int $exercicio)
+    {
+        $this->programas = Programa::publicados()
+            ->doExercicio($exercicio)
+            ->with('secretaria')
+            ->orderBy('nome')
+            ->get();
+    }
+
+    /** Exercício mais recente com programas publicados. */
+    public static function exercicioAtual(): int
+    {
+        return (int) (Programa::publicados()->max('exercicio') ?? now()->year);
+    }
+
+    /** @return list<int> */
+    public static function exerciciosDisponiveis(): array
+    {
+        return Programa::publicados()->distinct()->orderByDesc('exercicio')->pluck('exercicio')->all();
+    }
+
+    public function total(): float
+    {
+        return (float) $this->programas->sum('valor');
+    }
+
+    public function quantidade(): int
+    {
+        return $this->programas->count();
+    }
+
+    public function semCusto(): int
+    {
+        return $this->programas->filter(fn (Programa $p) => ! $p->temCustoDireto())->count();
+    }
+
+    /** @return Collection<int, array{secretaria: Secretaria, total: float, quantidade: int, fracao: float}> */
+    public function porSecretaria(): Collection
+    {
+        $total = $this->total() ?: 1;
+
+        return $this->programas
+            ->groupBy('secretaria_id')
+            ->map(fn (Collection $grupo) => [
+                'secretaria' => $grupo->first()->secretaria,
+                'total' => (float) $grupo->sum('valor'),
+                'quantidade' => $grupo->count(),
+                'fracao' => $grupo->sum('valor') / $total,
+            ])
+            ->sortByDesc('total')
+            ->values();
+    }
+
+    /**
+     * Ordem fixa dos tipos (a cor de cada um segue a ordem, não o tamanho).
+     *
+     * @return Collection<int, array{mecanismo: Mecanismo, total: float, quantidade: int, fracao: float, exemplos: Collection}>
+     */
+    public function porMecanismo(): Collection
+    {
+        $total = $this->total() ?: 1;
+
+        return collect(Mecanismo::cases())->map(function (Mecanismo $mecanismo) use ($total) {
+            $grupo = $this->programas->where('mecanismo', $mecanismo);
+
+            return [
+                'mecanismo' => $mecanismo,
+                'total' => (float) $grupo->sum('valor'),
+                'quantidade' => $grupo->count(),
+                'fracao' => $grupo->sum('valor') / $total,
+                'exemplos' => $grupo->sortByDesc('valor')->take(3)->pluck('nome'),
+            ];
+        });
+    }
+
+    /** Parte que chega como dinheiro ou incentivo direto (todos menos serviços). */
+    public function fracaoDireta(): float
+    {
+        $total = $this->total() ?: 1;
+
+        return $this->programas->where('mecanismo', '!=', Mecanismo::ServicoPublico)->sum('valor') / $total;
+    }
+
+    /** @return Collection<int, Programa> */
+    public function maiores(int $quantos = 10): Collection
+    {
+        return $this->programas->filter->temCustoDireto()->sortByDesc('valor')->take($quantos)->values();
+    }
+
+    /** @return Collection<int, array{perfil: PublicoAlvo, quantidade: int}> */
+    public function perfis(): Collection
+    {
+        return collect(PublicoAlvo::cases())
+            ->map(fn (PublicoAlvo $perfil) => [
+                'perfil' => $perfil,
+                'quantidade' => $this->programas->filter(fn (Programa $p) => in_array($perfil->value, $p->publico_alvo ?? [], true))->count(),
+            ])
+            ->filter(fn (array $item) => $item['quantidade'] > 0)
+            ->values();
+    }
+
+    /** Programas agrupados pelo ano de criação, do mais antigo ao mais recente. */
+    public function linhaDoTempo(): Collection
+    {
+        return $this->programas
+            ->whereNotNull('ano_criacao')
+            ->sortBy('ano_criacao')
+            ->groupBy('ano_criacao');
+    }
+
+    public function ultimaAtualizacao(): ?\Carbon\CarbonInterface
+    {
+        return $this->programas->max('updated_at');
+    }
+}
