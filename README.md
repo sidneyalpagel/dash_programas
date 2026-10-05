@@ -49,69 +49,53 @@ No ambiente `local`, o seeder cria usuários de teste com senha `password`:
 
 Testes: `php artisan test`
 
-## Instalação no servidor (HestiaCP)
+## Produção (servidor da Prefeitura)
 
-1. **Domínio:** em *Web*, adicione o domínio (ex.: `programas.santahelena.pr.gov.br`), ative SSL (Let's Encrypt)
-   e escolha o template **laravel** (Nginx) com PHP **8.3 ou superior**. Esse template aponta a raiz para `public_html/public`.
-   Se a sua versão do Hestia não tiver esse template, peça ao responsável pelo servidor que aponte a raiz do domínio para a pasta `public` do projeto.
-2. **Banco:** em *DB*, crie um banco MySQL/MariaDB e anote nome, usuário e senha (o Hestia prefixa com o nome do usuário).
-3. **Código** (via SSH, com o usuário do Hestia):
+| Item | Valor |
+|---|---|
+| Site | https://programas.santahelena.pr.gov.br (painel em `/admin`) |
+| Servidor web | HestiaCP em `192.168.0.23`, usuário Hestia **`programas`**, PHP **8.4** (PHP-FPM) |
+| Código | `/home/programas/web/programas.santahelena.pr.gov.br/private/dash_programas` |
+| Raiz web | `public_html` é um link para `private/dash_programas/public` (veja abaixo) |
+| Banco | MySQL 8 em `192.168.0.24`, banco e usuário **`programas`** (acesso só a partir do `.23`). A senha está apenas no `.env` do servidor |
+| Certificado | Wildcard `*.santahelena.pr.gov.br`, o mesmo dos demais domínios |
+| GitHub | O servidor baixa o código com uma *deploy key* de leitura (`~programas/.ssh/github_dash_programas`) |
+
+**Por que o código fica em `private/`:** o Hestia limita o PHP (`open_basedir`) à raiz do site. Se a raiz apontar para
+`public_html/public`, o Laravel não consegue ler `storage/` e `vendor/`. Com o projeto em `private/` (que o PHP pode ler)
+e `public_html` apontando para `private/dash_programas/public`, funciona sem alterar os templates do servidor.
+
+### Atualizar o site
+
+1. Na sua máquina: faça as alterações, rode `npm run build` se mexeu em CSS/JS/views do site, rode os testes, faça commit e push.
+2. No servidor:
    ```bash
-   cd ~/web/programas.santahelena.pr.gov.br
-   rm -rf public_html && git clone https://github.com/sidneyalpagel/dash_programas.git public_html
-   cd public_html
-   composer install --no-dev --optimize-autoloader
-   cp .env.example .env
-   php artisan key:generate
+   ssh root@192.168.0.23
+   su - programas -c "~/web/programas.santahelena.pr.gov.br/private/dash_programas/deploy.sh"
    ```
-4. **Configuração** — edite o `.env`:
-   ```dotenv
-   APP_ENV=production
-   APP_DEBUG=false
-   APP_URL=https://programas.santahelena.pr.gov.br
+   O `deploy.sh` coloca o site em manutenção, faz `git pull`, `composer install`, `migrate`, recria os caches e tira da manutenção.
 
-   DB_CONNECTION=mysql
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_DATABASE=usuario_programas
-   DB_USERNAME=usuario_programas
-   DB_PASSWORD=...
-
-   # Necessário para "Esqueceu sua senha?" funcionar
-   MAIL_MAILER=smtp
-   MAIL_HOST=...
-   MAIL_PORT=587
-   MAIL_USERNAME=...
-   MAIL_PASSWORD=...
-   MAIL_FROM_ADDRESS=nao-responda@santahelena.pr.gov.br
-   ```
-5. **Banco, dados iniciais e primeiro administrador:**
-   ```bash
-   php artisan migrate --force
-   php artisan db:seed --force          # secretarias + 42 programas do PDF
-   php artisan usuarios:criar --admin   # pede nome, e-mail e senha
-   php artisan optimize
-   php artisan filament:optimize
-   ```
-6. Crie os usuários das secretarias pelo painel (*Administração → Usuários*) ou com `php artisan usuarios:criar`.
-
-Os arquivos de `public/build` (CSS/JS do site) já vêm compilados no repositório, então **o servidor não precisa de Node**.
-
-### Atualizar o servidor
+### Usuários do painel
 
 ```bash
-cd ~/web/programas.santahelena.pr.gov.br/public_html
-php artisan down
-git pull
-composer install --no-dev --optimize-autoloader
-php artisan migrate --force
-php artisan optimize
-php artisan filament:optimize
-php artisan up
+ssh -t root@192.168.0.23 'su - programas -c "cd ~/web/programas.santahelena.pr.gov.br/private/dash_programas && php8.4 artisan usuarios:criar --admin"'
 ```
 
-Se alterar CSS/JS ou as views do site, rode `npm run build` **na sua máquina** e faça commit de `public/build` antes do `git pull` no servidor.
+Sem `--admin`, o comando pergunta a secretaria do servidor. Também é possível criar usuários pelo painel (*Administração → Usuários*).
 
-### Backup
+### Pontos de atenção
 
-O backup do Hestia (*Backups*) já inclui os arquivos e o banco. Recomenda-se ativar o backup diário do usuário.
+- **E-mail:** o `.env` de produção está com `MAIL_MAILER=log`, então "Esqueceu sua senha?" não envia e-mail. Configure o SMTP no `.env` (`MAIL_*`) e rode o `deploy.sh`.
+- **Certificado:** o wildcard foi copiado do domínio `esporte`. Ao renovar o wildcard nos demais domínios, renove também neste (`v-add-web-domain-ssl` / `v-update-web-domain-ssl`).
+- **Backup:** o backup do Hestia cobre os arquivos; o banco está no `192.168.0.24` e precisa estar na rotina de backup daquele servidor.
+
+### Instalação do zero (referência)
+
+1. Hestia: `v-add-user programas …`, `v-change-user-shell programas bash`, `v-add-web-domain programas <domínio>`, `v-change-web-domain-backend-tpl programas <domínio> PHP-8_4`.
+2. MySQL: `CREATE DATABASE programas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;` e um usuário com `GRANT ALL ON programas.*` só para o IP do servidor web.
+3. Como `programas`: clonar em `~/web/<domínio>/private/dash_programas`, `php8.4 /usr/bin/composer install --no-dev -o`, copiar `.env.example` para `.env` (APP_ENV=production, APP_DEBUG=false, APP_URL, DB_*), `php8.4 artisan key:generate`.
+4. Como root: substituir `public_html` por um link `public_html -> private/dash_programas/public` (`chown -h programas:www-data public_html`).
+5. `php8.4 artisan migrate --force`, `php8.4 artisan db:seed --force` (secretarias + 42 programas do PDF), `usuarios:criar --admin`, `optimize`, `filament:optimize`.
+6. SSL: `v-add-web-domain-ssl` com o wildcard e `v-add-web-domain-ssl-force`.
+
+Os arquivos de `public/build` (CSS/JS do site) vêm compilados no repositório, então **o servidor não precisa de Node**.
