@@ -8,47 +8,97 @@
     $maiorPrograma = $maiores->first();
 @endphp
 
-<x-layouts.site :panorama="$panorama">
+<x-layouts.site :panorama="$panorama" :faixa="false">
     {{-- Abertura ---------------------------------------------------------- --}}
-    <section class="border-b border-line bg-surface">
-        <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-            <p class="text-sm font-semibold tracking-wide text-ink-2 uppercase">Exercício {{ $panorama->exercicio }}</p>
-            <h1 class="mt-3 max-w-3xl text-2xl leading-snug font-semibold text-ink-2 sm:text-3xl">
-                A Prefeitura de Santa Helena destinou
-                <span class="block text-5xl leading-tight font-bold text-ink sm:text-6xl">{{ Formato::moedaCurta($panorama->total()) }}</span>
-                a {{ $panorama->quantidade() }} programas de {{ $porSecretaria->count() }} secretarias.
-            </h1>
-            <p class="mt-4 max-w-2xl text-lg text-ink-2">
-                Aqui você descobre para onde vai esse dinheiro, quem é atendido e como participar.
+    @php
+        $milhoes = round($panorama->total() / 1_000_000, 1);
+        $destaques = $panorama->destaquesAtendidos(6);
+    @endphp
+    <section class="heroi relative overflow-hidden text-white">
+        <div class="relative mx-auto max-w-6xl px-4 pt-12 pb-14 sm:px-6 sm:pt-16 sm:pb-20">
+            <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/90 ring-1 ring-white/15">
+                <span class="h-2 w-2 rounded-full bg-gold" aria-hidden="true"></span>
+                Exercício {{ $panorama->exercicio }} · Prefeitura de Santa Helena
             </p>
-            <div class="mt-6 flex flex-wrap gap-3">
-                <a href="#para-mim" class="rounded-lg bg-brand px-5 py-3 font-semibold text-white no-underline hover:bg-brand-2">Que programas existem para mim?</a>
-                <a href="{{ route('programas.index') }}" class="rounded-lg border border-line bg-surface px-5 py-3 font-semibold text-ink no-underline hover:border-link">Ver todos os programas</a>
+
+            <h1 class="mt-6">
+                <span class="block text-xl font-medium text-white/80 sm:text-2xl">A Prefeitura destinou</span>
+                <span class="mt-1 block text-[3.5rem] leading-none font-extrabold tracking-tight sm:text-8xl lg:text-9xl">
+                    <x-numero-animado :valor="$milhoes" :casas="1" prefixo="R$ " />
+                    <span class="text-[0.55em] font-bold text-gold">{{ $milhoes < 2 ? 'milhão' : 'milhões' }}</span>
+                </span>
+                <span class="mt-4 block max-w-3xl text-xl leading-snug font-medium text-white/90 sm:text-2xl">
+                    a <strong class="font-bold text-white">{{ $panorama->quantidade() }} programas</strong> que chegam a estudantes, famílias,
+                    produtores rurais, empresas, idosos e atletas.
+                </span>
+            </h1>
+
+            <div class="mt-8 flex flex-wrap gap-3">
+                <a href="#para-mim" class="rounded-lg bg-gold px-5 py-3 font-semibold text-[#15171c] no-underline shadow-lg shadow-black/20 hover:brightness-105">Que programas existem para mim?</a>
+                <a href="{{ route('programas.index') }}" class="rounded-lg px-5 py-3 font-semibold text-white no-underline ring-1 ring-white/40 hover:bg-white/10">Ver todos os programas</a>
             </div>
 
-            <dl class="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <div class="rounded-xl bg-surface-2 p-4">
-                    <dt class="text-sm text-ink-2">Programas</dt>
-                    <dd class="mt-1 text-3xl font-semibold">{{ $panorama->quantidade() }}</dd>
+            <div class="mt-12 grid gap-4 sm:grid-cols-3">
+                <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/15 backdrop-blur-sm">
+                    <p class="text-5xl font-extrabold tracking-tight sm:text-6xl">
+                        <x-numero-animado :valor="round($panorama->fracaoDireta() * 100, 1)" :casas="1" sufixo="%" />
+                    </p>
+                    <p class="mt-2 text-base font-medium text-white/90">chega direto às pessoas</p>
+                    <p class="mt-1 text-sm text-white/70">em dinheiro, bolsa ou incentivo, sem passar por obras ou serviços.</p>
                 </div>
-                <div class="rounded-xl bg-surface-2 p-4">
-                    <dt class="text-sm text-ink-2">Secretarias</dt>
-                    <dd class="mt-1 text-3xl font-semibold">{{ $porSecretaria->count() }}</dd>
-                </div>
-                <div class="rounded-xl bg-surface-2 p-4">
-                    <dt class="text-sm text-ink-2">Programas sem custo direto</dt>
-                    <dd class="mt-1 text-3xl font-semibold">{{ $panorama->semCusto() }}</dd>
+                <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/15 backdrop-blur-sm">
+                    <p class="text-5xl font-extrabold tracking-tight sm:text-6xl">
+                        <x-numero-animado :valor="$panorama->quantidade()" />
+                    </p>
+                    <p class="mt-2 text-base font-medium text-white/90">programas em {{ $porSecretaria->count() }} secretarias</p>
+                    <p class="mt-1 text-sm text-white/70">{{ $panorama->semCusto() }} deles funcionam sem custo direto para o Município.</p>
                 </div>
                 @if ($maiorPrograma)
-                    <div class="rounded-xl bg-surface-2 p-4">
-                        <dt class="text-sm text-ink-2">Maior programa</dt>
-                        <dd class="mt-1 text-2xl font-semibold sm:text-3xl">{{ Formato::moedaCurta($maiorPrograma->valor) }}</dd>
-                        <dd class="text-sm text-ink-2">{{ $maiorPrograma->nome }}</dd>
+                    <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/15 backdrop-blur-sm">
+                        <p class="text-5xl font-extrabold tracking-tight sm:text-6xl">
+                            <x-numero-animado :valor="round($maiorPrograma->valor / 1_000_000, 1)" :casas="1" prefixo="R$ " /><span class="text-2xl font-bold sm:text-3xl"> mi</span>
+                        </p>
+                        <p class="mt-2 text-base font-medium text-white/90">no maior programa</p>
+                        <p class="mt-1 text-sm text-white/70">
+                            <a href="{{ route('programas.show', $maiorPrograma) }}" class="text-white underline decoration-white/40 underline-offset-2 hover:decoration-white">{{ $maiorPrograma->nome }}</a>
+                        </p>
                     </div>
                 @endif
-            </dl>
+            </div>
+        </div>
+        <div class="relative flex h-1.5" aria-hidden="true">
+            <span class="flex-1 bg-[#1e7145]"></span>
+            <span class="flex-1 bg-gold"></span>
         </div>
     </section>
+
+    {{-- Quem é atendido --------------------------------------------------- --}}
+    @if ($destaques->isNotEmpty())
+        <section aria-labelledby="atendidos" class="border-b border-line bg-surface">
+            <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+                <h2 id="atendidos" class="text-2xl font-semibold sm:text-3xl">Por trás dos números, pessoas</h2>
+                <p class="mt-2 max-w-3xl text-ink-2">Alguns dos públicos atendidos em {{ $panorama->exercicio }}.</p>
+
+                <ul class="mt-8 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach ($destaques as $programa)
+                        <li class="border-l-4 pl-4" style="border-color: {{ $programa->mecanismo->corCss() }}">
+                            <p class="text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
+                                <x-numero-animado :valor="$programa->qtd_atendidos" />
+                            </p>
+                            <p class="mt-1 text-lg font-semibold text-ink-2">{{ $programa->unidade_atendidos }}</p>
+                            <p class="mt-1 text-sm text-muted">
+                                <a href="{{ route('programas.show', $programa) }}">{{ $programa->nome }}</a> · {{ $programa->secretaria->nome_curto }}
+                            </p>
+                        </li>
+                    @endforeach
+                </ul>
+
+                <p class="mt-8 text-sm text-muted">
+                    Cada número é de um programa. Uma mesma pessoa pode participar de vários programas; por isso os números não são somados.
+                </p>
+            </div>
+        </section>
+    @endif
 
     <div class="mx-auto max-w-6xl space-y-14 px-4 pt-12 sm:px-6">
 

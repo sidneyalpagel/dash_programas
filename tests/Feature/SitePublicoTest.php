@@ -30,7 +30,7 @@ class SitePublicoTest extends TestCase
 
     public function test_paginas_publicas_abrem(): void
     {
-        $this->get('/')->assertOk()->assertSee('R$ 60,1 milhões')->assertSee('39,5%');
+        $this->get('/')->assertOk()->assertSeeInOrder(['R$ 60,1', 'milhões'])->assertSee('39,5%')->assertSee('Por trás dos números');
         $this->get('/programas')->assertOk()->assertSee('42 programas');
         $this->get('/programas?perfil=familias')->assertOk()->assertSee('10 programas');
         $this->get('/programas?busca=transporte')->assertOk()->assertSee('2 programas');

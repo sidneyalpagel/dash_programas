@@ -1,4 +1,4 @@
-@props(['titulo' => null, 'descricao' => null, 'panorama' => null])
+@props(['titulo' => null, 'descricao' => null, 'panorama' => null, 'faixa' => true])
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -37,10 +37,12 @@
                 </ul>
             </nav>
         </div>
+        @if ($faixa)
         <div class="flex h-1.5" aria-hidden="true">
             <span class="flex-1 bg-[#1e7145]"></span>
             <span class="flex-1 bg-gold"></span>
         </div>
+        @endif
     </header>
 
     <main id="conteudo">

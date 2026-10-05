@@ -105,6 +105,27 @@ class Panorama
         return $this->programas->filter->temCustoDireto()->sortByDesc('valor')->take($quantos)->values();
     }
 
+    /**
+     * Programas com mais atendidos para a faixa "Quem é atendido": o maior de
+     * cada secretaria primeiro (para mostrar a variedade) e depois os maiores no geral.
+     *
+     * @return Collection<int, Programa>
+     */
+    public function destaquesAtendidos(int $quantos = 6): Collection
+    {
+        $comAtendidos = $this->programas
+            ->filter(fn (Programa $p) => $p->qtd_atendidos > 0)
+            ->sortByDesc('qtd_atendidos');
+
+        $umPorSecretaria = $comAtendidos->unique('secretaria_id');
+
+        return $umPorSecretaria
+            ->concat($comAtendidos->diff($umPorSecretaria))
+            ->take($quantos)
+            ->sortByDesc('qtd_atendidos')
+            ->values();
+    }
+
     /** @return Collection<int, array{perfil: PublicoAlvo, quantidade: int}> */
     public function perfis(): Collection
     {

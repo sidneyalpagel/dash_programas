@@ -57,6 +57,47 @@ document.addEventListener('focusout', esconder);
 document.addEventListener('keydown', (e) => e.key === 'Escape' && esconder());
 window.addEventListener('scroll', esconder, { passive: true });
 
+// Contagem animada dos números de destaque. O valor final já está no HTML;
+// sem JS ou com "reduzir movimento" ativado, nada muda.
+const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const contadores = document.querySelectorAll('[data-contar]');
+
+if (!semMovimento && 'IntersectionObserver' in window && contadores.length) {
+    const formatar = (el, valor) => {
+        const casas = Number(el.dataset.casas || 0);
+        const texto = valor.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+        return `${el.dataset.prefixo || ''}${texto}${el.dataset.sufixo || ''}`;
+    };
+
+    const animar = (el) => {
+        const final = Number(el.dataset.contar);
+        const duracao = 1400;
+        const inicio = performance.now();
+
+        const passo = (agora) => {
+            const t = Math.min(1, (agora - inicio) / duracao);
+            const suave = 1 - Math.pow(1 - t, 3);
+            el.textContent = formatar(el, final * suave);
+            if (t < 1) requestAnimationFrame(passo);
+        };
+
+        requestAnimationFrame(passo);
+    };
+
+    const observador = new IntersectionObserver((entradas) => {
+        entradas.forEach((entrada) => {
+            if (!entrada.isIntersecting) return;
+            observador.unobserve(entrada.target);
+            animar(entrada.target);
+        });
+    }, { threshold: 0.4 });
+
+    contadores.forEach((el) => {
+        el.setAttribute('aria-label', el.textContent);
+        observador.observe(el);
+    });
+}
+
 // Filtros da lista de programas: aplica ao trocar o select, sem botão extra.
 document.querySelectorAll('[data-auto-submit]').forEach((campo) => {
     campo.addEventListener('change', () => campo.form.requestSubmit());

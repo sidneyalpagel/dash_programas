@@ -120,6 +120,14 @@
 }
 
 @layer components {
+    /* Abertura da página inicial: azul institucional com brilho discreto em verde e dourado. */
+    .heroi {
+        background:
+            radial-gradient(60rem 30rem at 85% -10%, rgb(201 162 39 / .28), transparent 60%),
+            radial-gradient(50rem 30rem at -10% 110%, rgb(30 113 69 / .45), transparent 60%),
+            linear-gradient(160deg, #1d3a6b 0%, #142b52 100%);
+    }
+
     .card {
         background: var(--surface);
         border: 1px solid var(--line);
