@@ -72,6 +72,10 @@
                                    @if ($rotaAtual === $rota) aria-current="page" @endif>{{ $rotulo }}</a>
                             </li>
                         @endforeach
+                        {{-- Entrada do painel das secretarias, como no site de obras. --}}
+                        <li class="ml-1.5 flex items-center">
+                            <a href="{{ url('/admin') }}" class="block rounded-lg border border-[#c9d1db] bg-white px-3.5 py-2 text-[0.8125rem] font-semibold whitespace-nowrap text-[#1c1f24] no-underline hover:border-brand hover:text-[#0b5a86]">Acesso restrito</a>
+                        </li>
                     </ul>
                 </nav>
             </div>
@@ -124,7 +128,6 @@
             </div>
             <div class="sm:text-right">
                 <p><a href="{{ $link('entenda') }}">Como os números são calculados</a></p>
-                <p class="mt-2"><a href="{{ url('/admin') }}" class="text-muted">Acesso restrito das secretarias</a></p>
             </div>
         </div>
     </footer>

@@ -188,7 +188,7 @@
         <div class="capTitulo"><b>{{ $num('acesso') }}</b><h2>Acesso ao painel</h2></div>
         <p class="capIntro">O painel é a área restrita onde cada secretaria mantém os seus programas. Cada pessoa tem o próprio usuário, e tudo o que faz fica registrado em seu nome.</p>
         <ol class="passos">
-            <li><strong>Abra o endereço do painel</strong><small><code>https://programas.santahelena.pr.gov.br/admin</code> — ou clique em <span class="botao">Acesso restrito das secretarias</span>, no rodapé do site.</small></li>
+            <li><strong>Abra o endereço do painel</strong><small><code>https://programas.santahelena.pr.gov.br/admin</code> — ou clique em <span class="botao">Acesso restrito</span>, no canto superior direito do site.</small></li>
             <li><strong>Entre com usuário e senha</strong><small>Criados pelo administrador do sistema. O login é pelo <strong>nome de usuário</strong> (ex.: <code>maria.silva</code>), não pelo e-mail; maiúsculas não fazem diferença.</small></li>
             <li><strong>Troque a senha no primeiro acesso</strong><small>Clique no círculo com suas iniciais, no canto superior direito → <span class="botao">Perfil</span>. Mínimo de 8 caracteres; o sistema pede a senha atual para salvar.</small></li>
             <li><strong>Ao terminar, saia</strong><small>Menu das iniciais → <span class="botao">Sair</span>. Indispensável em computador compartilhado.</small></li>
