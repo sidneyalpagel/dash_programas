@@ -28,6 +28,9 @@ class ProgramaResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nome';
 
+    // O slug se repete entre exercícios (o mesmo programa em 2025 e 2026); no painel, identifica pelo id.
+    protected static ?string $recordRouteKeyName = 'id';
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema

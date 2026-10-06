@@ -67,7 +67,7 @@ class FluxoPublicacaoTest extends TestCase
 
         $this->actingAs($this->agricultura);
 
-        Livewire::test(EditPrograma::class, ['record' => $programa->getRouteKey()])
+        Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
             ->fillForm([
                 'como_participar' => 'Apicultores cadastrados na Secretaria de Agricultura.',
                 'valor' => '200.000,00',
@@ -90,7 +90,7 @@ class FluxoPublicacaoTest extends TestCase
         // O administrador aprova.
         $this->actingAs($this->admin);
 
-        Livewire::test(EditPrograma::class, ['record' => $programa->getRouteKey()])
+        Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
             ->callAction('revisar');
 
         $programa->refresh();
@@ -108,7 +108,7 @@ class FluxoPublicacaoTest extends TestCase
 
         $this->actingAs($this->admin);
 
-        Livewire::test(EditPrograma::class, ['record' => $programa->getRouteKey()])
+        Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
             ->callAction('revisar', arguments: ['descartar' => true]);
 
         $programa->refresh();
@@ -142,7 +142,7 @@ class FluxoPublicacaoTest extends TestCase
         $this->assertEquals(250000, (float) $programa->valor);
         $this->get('/programas/programa-de-teste-rural')->assertNotFound();
 
-        Livewire::test(EditPrograma::class, ['record' => $programa->getRouteKey()])
+        Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
             ->assertActionHidden('publicar')
             ->callAction('enviarRevisao');
 
@@ -150,7 +150,7 @@ class FluxoPublicacaoTest extends TestCase
 
         $this->actingAs($this->admin);
 
-        Livewire::test(EditPrograma::class, ['record' => $programa->getRouteKey()])
+        Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
             ->callAction('publicar');
 
         $this->assertSame(StatusPrograma::Publicado, $programa->refresh()->status);

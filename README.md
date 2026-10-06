@@ -19,6 +19,27 @@ Toda alteração fica registrada no **histórico** do programa (quem, quando, o 
 
 O painel mostra as **fichas a completar**: programas sem descrição, sem "como participar", sem base legal, sem público-alvo, sem quantidade atendida ou com fonte de recurso não informada.
 
+## Exercícios (anos)
+
+Cada programa pertence a um exercício. O mesmo programa em anos diferentes são registros separados, com o mesmo endereço no site.
+
+- **Ano exibido no site:** o administrador escolhe em *Programas → botão "No site: 2025"*. O site só muda de ano quando ele trocar,
+  mesmo que já existam programas do ano seguinte publicados. Os demais anos ficam acessíveis pelo seletor "Exercício" no topo do site
+  e por endereços com o ano: `/2024`, `/2024/programas`, `/2024/programas/educa-mais-santa-helena`.
+- **O ano não muda depois de criado** (evita apagar, sem querer, os dados de um ano ao "transformá-lo" em outro).
+- **Nome único** por secretaria e exercício.
+
+### Virada de ano (ex.: 2025 → 2026)
+
+1. Em *Programas*, filtre por **Ano = 2025**, selecione todos e use **"Copiar para outro exercício"** → 2026.
+   As secretarias também podem fazer isso com os próprios programas. Cada cópia vira **rascunho** com descrição, como participar,
+   leis, público e tipo; **valor e quantidades ficam em branco**.
+2. Cada secretaria filtra por Ano = 2026, completa valores e atendidos (as fichas aparecem em "a completar") e envia para revisão.
+3. O administrador revisa e publica. Enquanto isso o site continua mostrando 2025.
+4. Quando 2026 estiver completo, troque em *Programas → "No site"* para 2026. O 2025 continua disponível em `/2025`.
+
+Anos anteriores (ex.: 2024) são cadastrados normalmente, escolhendo o ano no formulário, ou copiando de 2025 e ajustando os números.
+
 ## Modelo de dados (resumo)
 
 Cada programa tem: exercício, secretaria, nome, grupo (programa-mãe, ex.: *Renda Santa Helena*), descrição, como participar,

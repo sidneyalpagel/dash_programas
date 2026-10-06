@@ -16,7 +16,7 @@
         </p>
 
         <h3 class="mt-2 text-lg leading-snug font-bold">
-            <a href="{{ route('programas.show', $programa) }}" class="text-ink no-underline after:absolute after:inset-0 group-hover:underline">{{ $programa->nome }}</a>
+            <a href="{{ $programa->urlPublica() }}" class="text-ink no-underline after:absolute after:inset-0 group-hover:underline">{{ $programa->nome }}</a>
         </h3>
 
         @if ($programa->grupo)

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Enums\Mecanismo;
 use App\Enums\PublicoAlvo;
+use App\Models\Configuracao;
 use App\Models\Programa;
 use App\Models\Secretaria;
 use Carbon\CarbonInterface;
@@ -26,16 +27,49 @@ class Panorama
             ->get();
     }
 
-    /** Exercício mais recente com programas publicados. */
-    public static function exercicioAtual(): int
+    /**
+     * Exercício que o site mostra por padrão. É escolhido pelo administrador no
+     * painel; enquanto não houver escolha (ou se o ano escolhido não tiver nada
+     * publicado), usa o mais recente com programas publicados.
+     */
+    public static function exercicioExibido(): int
     {
-        return (int) (Programa::publicados()->max('exercicio') ?? now()->year);
+        $disponiveis = static::exerciciosDisponiveis();
+        $escolhido = (int) Configuracao::obter(Configuracao::EXERCICIO_EXIBICAO);
+
+        if (in_array($escolhido, $disponiveis, true)) {
+            return $escolhido;
+        }
+
+        return $disponiveis[0] ?? (int) now()->year;
     }
 
-    /** @return list<int> */
+    /** @deprecated Use exercicioExibido(). */
+    public static function exercicioAtual(): int
+    {
+        return static::exercicioExibido();
+    }
+
+    /** Exercícios com algo publicado, do mais recente ao mais antigo. @return list<int> */
     public static function exerciciosDisponiveis(): array
     {
-        return Programa::publicados()->distinct()->orderByDesc('exercicio')->pluck('exercicio')->all();
+        return array_map('intval', Programa::publicados()->distinct()->orderByDesc('exercicio')->pluck('exercicio')->all());
+    }
+
+    public function ehExibido(): bool
+    {
+        return $this->exercicio === static::exercicioExibido();
+    }
+
+    /**
+     * Rota do site mantendo o ano: sem prefixo para o exercício exibido,
+     * com /{ano}/ para os demais.
+     */
+    public function rota(string $nome, array $parametros = []): string
+    {
+        return $this->ehExibido()
+            ? route($nome, $parametros)
+            : route('ano.'.$nome, ['ano' => $this->exercicio] + $parametros);
     }
 
     public function total(): float

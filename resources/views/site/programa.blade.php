@@ -16,9 +16,9 @@
 <x-layouts.site :titulo="$programa->nome" :descricao="$programa->descricao" :panorama="$panorama">
     <x-cabecalho-pagina :titulo="$programa->nome">
         <x-slot:trilha>
-            <a href="{{ route('programas.index') }}" class="text-white/85 hover:text-white">Programas</a>
+            <a href="{{ $panorama->rota('programas.index') }}" class="text-white/85 hover:text-white">Programas</a>
             <span aria-hidden="true">›</span>
-            <a href="{{ route('programas.index', ['secretaria' => $secretaria->slug]) }}" class="text-white/85 hover:text-white">{{ $secretaria->nome_curto }}</a>
+            <a href="{{ $panorama->rota('programas.index', ['secretaria' => $secretaria->slug]) }}" class="text-white/85 hover:text-white">{{ $secretaria->nome_curto }}</a>
         </x-slot:trilha>
 
         <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
@@ -27,7 +27,7 @@
                 {{ $programa->mecanismo->getLabel() }}
             </span>
             @if ($programa->grupo)
-                <a href="{{ route('programas.index', ['grupo' => $programa->grupo]) }}" class="rounded-full px-3 py-1 font-medium text-white no-underline ring-1 ring-white/30 hover:bg-white/10">
+                <a href="{{ $panorama->rota('programas.index', ['grupo' => $programa->grupo]) }}" class="rounded-full px-3 py-1 font-medium text-white no-underline ring-1 ring-white/30 hover:bg-white/10">
                     Parte do {{ $programa->grupo }}
                 </a>
             @endif
@@ -120,7 +120,7 @@
                     @if ($programa->perfis())
                         <ul class="mt-4 flex flex-wrap gap-2">
                             @foreach ($programa->perfis() as $perfil)
-                                <li><a href="{{ route('programas.index', ['perfil' => $perfil->value]) }}" class="chip">{{ $perfil->getLabel() }}</a></li>
+                                <li><a href="{{ $panorama->rota('programas.index', ['perfil' => $perfil->value]) }}" class="chip">{{ $perfil->getLabel() }}</a></li>
                             @endforeach
                         </ul>
                     @else

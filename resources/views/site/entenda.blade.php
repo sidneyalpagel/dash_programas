@@ -63,7 +63,7 @@
                             @if ($item['exemplos']->isNotEmpty())
                                 <p class="mt-3 text-sm text-muted">Exemplos: {{ $item['exemplos']->join(', ', ' e ') }}.</p>
                             @endif
-                            <a href="{{ route('programas.index', ['tipo' => $item['mecanismo']->value]) }}" class="mt-4 inline-block text-sm font-semibold">Ver estes programas →</a>
+                            <a href="{{ $panorama->rota('programas.index', ['tipo' => $item['mecanismo']->value]) }}" class="mt-4 inline-block text-sm font-semibold">Ver estes programas →</a>
                         </div>
                     </li>
                 @endforeach

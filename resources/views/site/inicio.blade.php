@@ -28,14 +28,14 @@
                     <span class="text-[0.55em] font-bold text-accent-soft">{{ $totalCurto['unidade'] }}</span>
                 </span>
                 <span class="mt-4 block max-w-3xl text-xl leading-snug font-medium text-white/90 sm:text-2xl">
-                    a <strong class="font-bold text-white">{{ $panorama->quantidade() }} programas</strong> que chegam a estudantes, famílias,
+                    a <strong class="font-bold text-white">{{ $panorama->quantidade() }} {{ $panorama->quantidade() === 1 ? 'programa' : 'programas' }}</strong> que chegam a estudantes, famílias,
                     produtores rurais, empresas, idosos e atletas.
                 </span>
             </h1>
 
             <div class="mt-8 flex flex-wrap gap-3">
                 <a href="#para-mim" class="rounded-lg bg-white px-5 py-3 font-semibold text-brand-2 no-underline shadow-lg shadow-black/20 hover:bg-[#eaf6fd]">Que programas existem para mim?</a>
-                <a href="{{ route('programas.index') }}" class="rounded-lg px-5 py-3 font-semibold text-white no-underline ring-1 ring-white/40 hover:bg-white/10">Ver todos os programas</a>
+                <a href="{{ $panorama->rota('programas.index') }}" class="rounded-lg px-5 py-3 font-semibold text-white no-underline ring-1 ring-white/40 hover:bg-white/10">Ver todos os programas</a>
             </div>
 
             <div class="mt-12 grid gap-4 sm:grid-cols-3">
@@ -50,7 +50,7 @@
                     <p class="text-5xl font-extrabold tracking-tight sm:text-6xl">
                         <x-numero-animado :valor="$panorama->quantidade()" />
                     </p>
-                    <p class="mt-2 text-base font-medium text-white/90">programas em {{ $porSecretaria->count() }} secretarias</p>
+                    <p class="mt-2 text-base font-medium text-white/90">{{ $panorama->quantidade() === 1 ? 'programa' : 'programas' }} em {{ $porSecretaria->count() }} {{ $porSecretaria->count() === 1 ? 'secretaria' : 'secretarias' }}</p>
                     <p class="mt-1 text-sm text-white/70">{{ $panorama->semCusto() }} deles funcionam sem custo direto para o Município.</p>
                 </div>
                 @if ($maiorPrograma)
@@ -60,7 +60,7 @@
                         </p>
                         <p class="mt-2 text-base font-medium text-white/90">no maior programa</p>
                         <p class="mt-1 text-sm text-white/70">
-                            <a href="{{ route('programas.show', $maiorPrograma) }}" class="text-white underline decoration-white/40 underline-offset-2 hover:decoration-white">{{ $maiorPrograma->nome }}</a>
+                            <a href="{{ $maiorPrograma->urlPublica() }}" class="text-white underline decoration-white/40 underline-offset-2 hover:decoration-white">{{ $maiorPrograma->nome }}</a>
                         </p>
                     </div>
                 @endif
@@ -84,7 +84,7 @@
                             </p>
                             <p class="mt-1 text-lg font-semibold text-ink-2">{{ $programa->unidade_atendidos }}</p>
                             <p class="mt-1 text-sm text-muted">
-                                <a href="{{ route('programas.show', $programa) }}">{{ $programa->nome }}</a> · {{ $programa->secretaria->nome_curto }}
+                                <a href="{{ $programa->urlPublica() }}">{{ $programa->nome }}</a> · {{ $programa->secretaria->nome_curto }}
                             </p>
                         </li>
                     @endforeach
@@ -121,7 +121,7 @@
                             <p class="mt-2 text-2xl font-semibold">{{ Formato::moedaCurta($item['total']) }}</p>
                             <p class="text-sm text-ink-2">{{ Formato::percentual($item['fracao']) }} do total · {{ $item['quantidade'] }} programas</p>
                             <p class="mt-3 text-sm text-ink-2">{{ $item['mecanismo']->getDescription() }}</p>
-                            <a href="{{ route('programas.index', ['tipo' => $item['mecanismo']->value]) }}" class="mt-auto pt-3 text-sm font-medium">Ver estes programas →</a>
+                            <a href="{{ $panorama->rota('programas.index', ['tipo' => $item['mecanismo']->value]) }}" class="mt-auto pt-3 text-sm font-medium">Ver estes programas →</a>
                         </li>
                     @endforeach
                 </ul>
@@ -149,7 +149,7 @@
                         @endphp
                         <li>
                             <p class="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
-                                <a href="{{ route('programas.index', ['secretaria' => $linha['secretaria']->slug]) }}" class="font-semibold text-ink">{{ $linha['secretaria']->nome_curto }}</a>
+                                <a href="{{ $panorama->rota('programas.index', ['secretaria' => $linha['secretaria']->slug]) }}" class="font-semibold text-ink">{{ $linha['secretaria']->nome_curto }}</a>
                                 <span class="text-ink-2">{{ $linha['quantidade'] }} programas</span>
                             </p>
                             <div class="mt-1.5 flex items-center gap-3">
@@ -213,7 +213,7 @@
                     @foreach ($maiores as $programa)
                         <li>
                             <p class="text-sm">
-                                <a href="{{ route('programas.show', $programa) }}" class="font-semibold text-ink">{{ $programa->nome }}</a>
+                                <a href="{{ $programa->urlPublica() }}" class="font-semibold text-ink">{{ $programa->nome }}</a>
                                 <span class="text-muted">· {{ $programa->secretaria->nome_curto }}</span>
                             </p>
                             <div class="mt-1.5 flex items-center gap-3">
@@ -239,7 +239,7 @@
             <ul class="mt-6 flex flex-wrap gap-3">
                 @foreach ($panorama->perfis() as $item)
                     <li>
-                        <a href="{{ route('programas.index', ['perfil' => $item['perfil']->value]) }}" class="chip">
+                        <a href="{{ $panorama->rota('programas.index', ['perfil' => $item['perfil']->value]) }}" class="chip">
                             {{ $item['perfil']->frase() }}
                             <span class="rounded-full bg-surface-2 px-2 py-0.5 text-xs font-semibold text-ink-2">{{ $item['quantidade'] }}</span>
                         </a>
@@ -265,7 +265,7 @@
                             <p class="font-semibold">{{ $ano }}</p>
                             <ul class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm">
                                 @foreach ($programas as $programa)
-                                    <li><a href="{{ route('programas.show', $programa) }}">{{ $programa->nome }}</a></li>
+                                    <li><a href="{{ $programa->urlPublica() }}">{{ $programa->nome }}</a></li>
                                 @endforeach
                             </ul>
                         </li>
@@ -291,7 +291,7 @@
                     <p class="mt-1">Uma família pode receber várias parcelas. Por isso mostramos quantas pessoas e quantos benefícios, separadamente.</p>
                 </li>
             </ul>
-            <a href="{{ route('entenda') }}" class="mt-5 inline-block font-medium">Saiba como os números são calculados →</a>
+            <a href="{{ $panorama->rota('entenda') }}" class="mt-5 inline-block font-medium">Saiba como os números são calculados →</a>
         </section>
     </div>
 </x-layouts.site>

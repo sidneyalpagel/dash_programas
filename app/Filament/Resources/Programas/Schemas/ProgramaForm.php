@@ -23,6 +23,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\RawJs;
 use Illuminate\Support\HtmlString;
+use Illuminate\Validation\Rules\Unique;
 
 class ProgramaForm
 {
@@ -62,17 +63,32 @@ class ProgramaForm
                             ->visible(fn () => auth()->user()->isAdmin()),
                         TextInput::make('exercicio')
                             ->label('Ano (exercício)')
-                            ->helperText('Ano a que se referem os valores e a quantidade de atendidos.')
+                            ->helperText(fn (string $operation) => $operation === 'create'
+                                ? 'Ano a que se referem os valores e a quantidade de atendidos. Não poderá ser alterado depois.'
+                                : 'Não pode ser alterado. Para outro ano, use "Copiar para outro exercício".')
                             ->integer()
                             ->minValue(2000)
                             ->maxValue(2100)
                             ->default(now()->year)
-                            ->required(),
+                            ->required()
+                            // Mudar o ano de um registro apagaria os dados do ano original.
+                            ->disabledOn('edit')
+                            ->live(onBlur: true),
                         TextInput::make('nome')
                             ->label('Nome do programa')
                             ->helperText('Use o nome pelo qual o cidadão conhece o programa.')
                             ->required()
                             ->maxLength(255)
+                            ->unique(
+                                table: 'programas',
+                                column: 'nome',
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule, Get $get, ?Programa $record) => $rule
+                                    ->where('exercicio', $record?->exercicio ?? (int) $get('exercicio'))
+                                    ->where('secretaria_id', $record?->secretaria_id
+                                        ?? ($get('secretaria_id') ?: auth()->user()->secretaria_id)),
+                            )
+                            ->validationMessages(['unique' => 'Esta secretaria já tem um programa com este nome neste exercício.'])
                             ->columnSpanFull(),
                         TextInput::make('grupo')
                             ->label('Faz parte de um programa maior?')

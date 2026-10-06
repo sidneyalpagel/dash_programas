@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Programas\Pages;
 
 use App\Enums\StatusPrograma;
+use App\Filament\Actions\CopiarParaExercicio;
 use App\Filament\Resources\Programas\ProgramaResource;
 use App\Models\Programa;
 use App\Support\DescricaoAlteracao;
@@ -123,9 +124,10 @@ class EditPrograma extends EditRecord
                 ->icon(Heroicon::OutlinedArrowTopRightOnSquare)
                 ->color('gray')
                 ->visible(fn () => $this->record->status === StatusPrograma::Publicado)
-                ->url(fn () => route('programas.show', $this->record), shouldOpenInNewTab: true),
+                ->url(fn () => $this->record->urlPublica(), shouldOpenInNewTab: true),
 
             ActionGroup::make([
+                CopiarParaExercicio::individual(),
                 Action::make('despublicar')
                     ->label('Tirar do site (voltar a rascunho)')
                     ->icon(Heroicon::OutlinedEyeSlash)

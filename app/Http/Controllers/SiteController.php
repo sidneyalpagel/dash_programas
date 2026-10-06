@@ -4,26 +4,54 @@ namespace App\Http\Controllers;
 
 use App\Enums\Mecanismo;
 use App\Enums\PublicoAlvo;
-use App\Enums\StatusPrograma;
 use App\Models\Programa;
 use App\Models\Secretaria;
 use App\Support\Panorama;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class SiteController extends Controller
 {
-    public function inicio(): View
+    /**
+     * Exercício da página: o do endereço (/2024/...) ou o exibido no site.
+     * Ano sem nada publicado dá 404; o próprio ano exibido redireciona para o endereço sem ano.
+     */
+    private function panorama(Request $request): Panorama
+    {
+        $ano = $request->route('ano');
+
+        if ($ano === null) {
+            return new Panorama(Panorama::exercicioExibido());
+        }
+
+        $ano = (int) $ano;
+        abort_unless(in_array($ano, Panorama::exerciciosDisponiveis(), true), 404);
+
+        if ($ano === Panorama::exercicioExibido()) {
+            $nome = Str::after($request->route()->getName(), 'ano.');
+            $parametros = array_diff_key($request->route()->parameters(), ['ano' => true]);
+
+            throw new HttpResponseException(redirect()->to(
+                route($nome, $parametros).($request->getQueryString() ? '?'.$request->getQueryString() : ''),
+                301,
+            ));
+        }
+
+        return new Panorama($ano);
+    }
+
+    public function inicio(Request $request): View
     {
         return view('site.inicio', [
-            'panorama' => new Panorama(Panorama::exercicioAtual()),
+            'panorama' => $this->panorama($request),
         ]);
     }
 
     public function programas(Request $request): View
     {
-        $panorama = new Panorama(Panorama::exercicioAtual());
+        $panorama = $this->panorama($request);
 
         $filtros = [
             'perfil' => PublicoAlvo::tryFrom((string) $request->query('perfil')),
@@ -59,15 +87,19 @@ class SiteController extends Controller
         ]);
     }
 
-    public function programa(Programa $programa): View
+    public function programa(Request $request): View
     {
-        abort_unless($programa->status === StatusPrograma::Publicado, 404);
+        $panorama = $this->panorama($request);
 
-        $programa->load('secretaria');
+        $programa = Programa::publicados()
+            ->doExercicio($panorama->exercicio)
+            ->where('slug', (string) $request->route('slug'))
+            ->with('secretaria')
+            ->firstOrFail();
 
         return view('site.programa', [
             'programa' => $programa,
-            'panorama' => new Panorama($programa->exercicio),
+            'panorama' => $panorama,
             'relacionados' => Programa::publicados()
                 ->doExercicio($programa->exercicio)
                 ->whereKeyNot($programa->id)
@@ -80,10 +112,10 @@ class SiteController extends Controller
         ]);
     }
 
-    public function entenda(): View
+    public function entenda(Request $request): View
     {
         return view('site.entenda', [
-            'panorama' => new Panorama(Panorama::exercicioAtual()),
+            'panorama' => $this->panorama($request),
         ]);
     }
 }

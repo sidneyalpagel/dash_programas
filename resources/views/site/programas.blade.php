@@ -25,10 +25,10 @@
         'busca' => $filtros['busca'] ?: null,
         'ordem' => $ordem !== 'nome' ? $ordem : null,
     ]);
-    $semFiltro = fn (string ...$chaves) => route('programas.index', array_diff_key($consulta, array_flip($chaves)));
+    $semFiltro = fn (string ...$chaves) => $panorama->rota('programas.index', array_diff_key($consulta, array_flip($chaves)));
 
     // Trocar de perfil recomeça a busca por texto e por grupo, para não somar filtros invisíveis.
-    $urlPerfil = fn (?string $perfil) => route('programas.index', array_filter(
+    $urlPerfil = fn (?string $perfil) => $panorama->rota('programas.index', array_filter(
         ['perfil' => $perfil] + array_diff_key($consulta, array_flip(['perfil', 'busca', 'grupo'])),
     ));
 
@@ -76,7 +76,7 @@
 
     <div class="mx-auto max-w-6xl px-4 sm:px-6">
         {{-- Demais filtros --}}
-        <form method="get" action="{{ route('programas.index') }}" class="card relative z-10 -mt-6 grid gap-4 p-4 shadow-lg shadow-black/5 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto] lg:items-end" role="search">
+        <form method="get" action="{{ $panorama->rota('programas.index') }}" class="card relative z-10 -mt-6 grid gap-4 p-4 shadow-lg shadow-black/5 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto] lg:items-end" role="search">
             @foreach (['perfil', 'grupo'] as $oculto)
                 @isset($consulta[$oculto])
                     <input type="hidden" name="{{ $oculto }}" value="{{ $consulta[$oculto] }}">
@@ -115,7 +115,7 @@
             <div class="flex items-center gap-3">
                 <button type="submit" class="rounded-lg bg-brand px-4 py-2 font-semibold text-white hover:bg-brand-2">Filtrar</button>
                 @if ($filtrado)
-                    <a href="{{ route('programas.index') }}" class="text-sm whitespace-nowrap">Limpar</a>
+                    <a href="{{ $panorama->rota('programas.index') }}" class="text-sm whitespace-nowrap">Limpar</a>
                 @endif
             </div>
         </form>
@@ -130,7 +130,7 @@
                     </li>
                 @endforeach
                 @if (count($ativos) > 1)
-                    <li><a href="{{ route('programas.index') }}" class="ml-1 font-medium">Limpar tudo</a></li>
+                    <li><a href="{{ $panorama->rota('programas.index') }}" class="ml-1 font-medium">Limpar tudo</a></li>
                 @endif
             </ul>
         @endif
@@ -140,9 +140,9 @@
                 @if ($programas->isEmpty())
                     Nenhum programa encontrado com esses filtros.
                     @if (count($ativos) > 1)
-                        Tente remover um deles acima ou <a href="{{ route('programas.index') }}">ver todos</a>.
+                        Tente remover um deles acima ou <a href="{{ $panorama->rota('programas.index') }}">ver todos</a>.
                     @else
-                        <a href="{{ route('programas.index') }}">Ver todos</a>.
+                        <a href="{{ $panorama->rota('programas.index') }}">Ver todos</a>.
                     @endif
                 @else
                     <strong class="text-ink">{{ $programas->count() }} {{ $programas->count() === 1 ? 'programa' : 'programas' }}</strong>

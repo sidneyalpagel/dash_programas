@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Programas\Tables;
 
 use App\Enums\Mecanismo;
 use App\Enums\StatusPrograma;
+use App\Filament\Actions\CopiarParaExercicio;
 use App\Models\Programa;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -70,7 +71,7 @@ class ProgramasTable
                 TextColumn::make('exercicio')
                     ->label('Ano')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
                 TextColumn::make('updated_at')
                     ->label('Atualizado em')
                     ->dateTime('d/m/Y H:i')
@@ -101,6 +102,8 @@ class ProgramasTable
                 EditAction::make(),
             ])
             ->toolbarActions([
+                // Virada de ano: selecione os programas e copie como rascunho para o novo exercício.
+                CopiarParaExercicio::emLote(),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ])->visible($admin),

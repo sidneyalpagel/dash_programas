@@ -7,6 +7,7 @@ use App\Enums\Mecanismo;
 use App\Enums\PublicoAlvo;
 use App\Enums\StatusPrograma;
 use App\Enums\TipoValor;
+use App\Support\Panorama;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -72,7 +73,7 @@ class Programa extends Model
     {
         static::saving(function (Programa $programa) {
             if (blank($programa->slug)) {
-                $programa->slug = static::slugUnico($programa->nome);
+                $programa->slug = static::slugUnico($programa->nome, (int) $programa->exercicio);
             }
 
             // Listas vazias viram null para que "falta preencher" seja só whereNull.
@@ -113,18 +114,55 @@ class Programa extends Model
         });
     }
 
-    public static function slugUnico(string $nome): string
+    /** Endereço único dentro do exercício: o mesmo programa mantém o slug de um ano para o outro. */
+    public static function slugUnico(string $nome, int $exercicio): string
     {
         $base = Str::slug(Str::limit($nome, 80, ''));
         $slug = $base;
         $i = 2;
 
-        while (static::where('slug', $slug)->exists()) {
+        while (static::where('exercicio', $exercicio)->where('slug', $slug)->exists()) {
             $slug = "{$base}-{$i}";
             $i++;
         }
 
         return $slug;
+    }
+
+    /** Ficha pública: sem o ano no endereço quando é o exercício exibido no site. */
+    public function urlPublica(): string
+    {
+        return $this->exercicio === Panorama::exercicioExibido()
+            ? route('programas.show', ['slug' => $this->slug])
+            : route('ano.programas.show', ['ano' => $this->exercicio, 'slug' => $this->slug]);
+    }
+
+    /**
+     * Cria um rascunho do programa em outro exercício. Copia o que descreve o
+     * programa; valores e quantidades ficam em branco para a secretaria informar.
+     * Retorna null se o programa já existe no exercício de destino.
+     */
+    public function copiarPara(int $exercicio): ?self
+    {
+        $existe = static::where('secretaria_id', $this->secretaria_id)
+            ->where('exercicio', $exercicio)
+            ->where(fn (Builder $q) => $q->where('nome', $this->nome)->orWhere('slug', $this->slug))
+            ->exists();
+
+        if ($existe || $exercicio === $this->exercicio) {
+            return null;
+        }
+
+        $copia = $this->replicate([
+            'valor', 'valor_total_vigencia', 'qtd_atendidos', 'qtd_beneficios', 'detalhe_atendidos',
+            'observacao_interna', 'alteracoes_pendentes', 'publicado_em', 'atualizado_por',
+        ]);
+        $copia->exercicio = $exercicio;
+        $copia->status = StatusPrograma::Rascunho;
+        $copia->acaoHistorico = "copiado de {$this->exercicio}";
+        $copia->save();
+
+        return $copia;
     }
 
     /** Programas plurianuais têm o valor anual calculado a partir do total. */
