@@ -38,14 +38,17 @@
                 @endif
             </div>
             <div>
-                <p class="text-xs text-muted">Atendidos</p>
                 @if ($programa->qtd_atendidos !== null)
+                    <p class="text-xs text-muted">Atendidos</p>
                     <p class="text-xl font-extrabold tracking-tight">{{ Formato::numero($programa->qtd_atendidos) }}</p>
-                    <p class="text-xs text-ink-2">{{ $programa->unidade_atendidos }}</p>
+                    @if (filled($programa->unidade_atendidos) && mb_strtolower($programa->unidade_atendidos) !== 'atendidos')
+                        <p class="text-xs text-ink-2">{{ $programa->unidade_atendidos }}</p>
+                    @endif
                 @elseif ($programa->qtd_beneficios !== null)
+                    <p class="text-xs text-muted">Benefícios pagos</p>
                     <p class="text-xl font-extrabold tracking-tight">{{ Formato::numero($programa->qtd_beneficios) }}</p>
-                    <p class="text-xs text-ink-2">benefícios pagos</p>
                 @else
+                    <p class="text-xs text-muted">Atendidos</p>
                     <p class="text-base font-semibold text-ink-2">—</p>
                 @endif
             </div>
