@@ -34,7 +34,7 @@
                 @if ($programa->temCustoDireto())
                     <p class="text-xl font-extrabold tracking-tight">{{ Formato::moedaCurta($programa->valor) }}</p>
                 @else
-                    <p class="text-base font-semibold text-ink-2">Sem custo direto</p>
+                    <p class="text-base font-semibold text-ink-2">{{ $programa->semCustoDireto() ? 'Sem custo direto' : 'A informar' }}</p>
                 @endif
             </div>
             <div>

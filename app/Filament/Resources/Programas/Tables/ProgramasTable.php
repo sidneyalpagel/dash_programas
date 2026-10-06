@@ -42,7 +42,7 @@ class ProgramasTable
                 TextColumn::make('valor')
                     ->label('Valor no ano')
                     ->money('BRL', locale: 'pt_BR')
-                    ->placeholder('Sem custo direto')
+                    ->placeholder(fn (Programa $record) => $record->semCustoDireto() ? 'Sem custo direto' : 'A informar')
                     ->sortable()
                     ->alignEnd(),
                 TextColumn::make('pendencias')

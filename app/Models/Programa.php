@@ -282,6 +282,28 @@ class Programa extends Model
         return $this->tipo_valor !== TipoValor::SemCusto && $this->valor !== null;
     }
 
+    /** Programa classificado como sem gasto direto do Município. */
+    public function semCustoDireto(): bool
+    {
+        return $this->tipo_valor === TipoValor::SemCusto;
+    }
+
+    /** Programa que tem custo, mas cujo valor a secretaria ainda não informou. */
+    public function valorPendente(): bool
+    {
+        return ! $this->semCustoDireto() && $this->valor === null;
+    }
+
+    /** Frase da ficha para programas sem custo direto, conforme a origem do recurso. */
+    public function explicacaoSemCusto(): string
+    {
+        return match ($this->fonte_recurso) {
+            FonteRecurso::Estadual => 'O recurso é do Governo do Estado. Não há gasto direto do Município.',
+            FonteRecurso::Federal => 'O recurso é da União. Não há gasto direto do Município.',
+            default => 'Não há gasto direto do Município com este programa.',
+        };
+    }
+
     /** @return list<PublicoAlvo> */
     public function perfis(): array
     {

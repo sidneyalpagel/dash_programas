@@ -107,8 +107,8 @@
             <h2 id="como-chega" class="text-2xl font-semibold">Como o dinheiro chega às pessoas</h2>
             <p class="mt-2 max-w-3xl text-ink-2">
                 <strong class="text-ink">{{ Formato::percentual($panorama->fracaoDireta()) }}</strong> do valor chega como dinheiro ou incentivo direto
-                a famílias, estudantes, produtores e empresas. O restante paga serviços que a própria Prefeitura presta,
-                como transporte escolar, merenda e máquinas agrícolas.
+                a famílias, estudantes, atletas, produtores, empresas e entidades esportivas. O restante paga serviços e compras
+                da própria Prefeitura, como transporte escolar, merenda e horas-máquina.
             </p>
 
             <div class="card mt-6 p-5 sm:p-6">

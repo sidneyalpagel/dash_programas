@@ -37,9 +37,15 @@
 
         <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <x-cartao-heroi :rotulo="'destinados em '.$programa->exercicio"
-                            :detalhe="$programa->temCustoDireto() ? Formato::moeda($programa->valor) : TipoValor::SemCusto->getDescription()">
-                @if (! $programa->temCustoDireto())
+                            :detalhe="match (true) {
+                                $programa->semCustoDireto() => $programa->explicacaoSemCusto(),
+                                $programa->valorPendente() => 'A secretaria responsável ainda vai informar o valor.',
+                                default => Formato::moeda($programa->valor),
+                            }">
+                @if ($programa->semCustoDireto())
                     <span class="text-3xl sm:text-4xl">Sem custo direto</span>
+                @elseif ($programa->valorPendente())
+                    <span class="text-3xl">A informar</span>
                 @elseif ($programa->valor >= 1_000_000)
                     <x-numero-animado :valor="round($programa->valor / 1_000_000, 1)" :casas="1" prefixo="R$ " /><span class="text-2xl font-bold"> mi</span>
                 @else
@@ -123,10 +129,10 @@
                 </section>
 
                 <section class="card p-6" aria-labelledby="como-chega">
-                    <h2 id="como-chega" class="text-xl font-bold">Como o dinheiro chega</h2>
+                    <h2 id="como-chega" class="text-xl font-bold">{{ $programa->semCustoDireto() ? 'Como funciona' : 'Como o dinheiro chega' }}</h2>
                     <p class="mt-3 flex items-start gap-3 text-ink-2">
                         <span class="amostra mt-1.5" style="background: {{ $programa->mecanismo->corCss() }}" aria-hidden="true"></span>
-                        <span><strong class="text-ink">{{ $programa->mecanismo->getLabel() }}.</strong> {{ $programa->mecanismo->getDescription() }}</span>
+                        <span><strong class="text-ink">{{ $programa->mecanismo->getLabel() }}.</strong> {{ $programa->semCustoDireto() ? $programa->explicacaoSemCusto() : $programa->mecanismo->explicacaoNaFicha() }}</span>
                     </p>
                     @if ($programa->tipo_valor === TipoValor::Anualizado)
                         <p class="mt-4 rounded-lg bg-warn-bg p-3 text-sm text-warn-ink">

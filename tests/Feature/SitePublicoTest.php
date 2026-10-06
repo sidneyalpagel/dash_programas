@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Mecanismo;
 use App\Enums\StatusPrograma;
 use App\Models\Programa;
 use Database\Seeders\ProgramaSeeder;
@@ -36,6 +37,41 @@ class SitePublicoTest extends TestCase
         $this->get('/programas?busca=transporte')->assertOk()->assertSee('2 programas');
         $this->get('/programas/desenvolve-agro')->assertOk()->assertSee('Valor anualizado');
         $this->get('/entenda')->assertOk();
+    }
+
+    public function test_ficha_explica_o_tipo_sem_citar_exemplos_de_outros_programas(): void
+    {
+        $fomento = Programa::where('nome', 'Programa Municipal de Fomento ao Esporte')->first();
+
+        $this->get(route('programas.show', $fomento))
+            ->assertOk()
+            ->assertSee('Como o dinheiro chega')
+            ->assertSee(Mecanismo::IncentivoProdutivo->explicacaoNaFicha())
+            ->assertDontSee('produtores rurais');
+    }
+
+    public function test_ficha_sem_custo_explica_a_origem_do_recurso(): void
+    {
+        $credito = Programa::where('nome', 'Fomento Paraná - Micro Fácil')->first();
+
+        $this->get(route('programas.show', $credito))
+            ->assertOk()
+            ->assertSee('Como funciona')
+            ->assertDontSee('Como o dinheiro chega')
+            ->assertSee('O recurso é do Governo do Estado. Não há gasto direto do Município.');
+    }
+
+    public function test_valor_nao_informado_nao_aparece_como_sem_custo(): void
+    {
+        $bolsa = Programa::where('nome', 'Programa Bolsa Atleta Municipal')->first();
+        $bolsa->update(['valor' => null]);
+
+        $this->get(route('programas.show', $bolsa))
+            ->assertOk()
+            ->assertSee('A informar')
+            ->assertDontSee('Sem custo direto');
+
+        $this->get('/')->assertSee('5 deles funcionam sem custo direto');
     }
 
     public function test_rascunho_nao_aparece_no_site(): void

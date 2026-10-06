@@ -6,6 +6,7 @@ use App\Enums\Mecanismo;
 use App\Enums\PublicoAlvo;
 use App\Models\Programa;
 use App\Models\Secretaria;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
 /**
@@ -49,7 +50,7 @@ class Panorama
 
     public function semCusto(): int
     {
-        return $this->programas->filter(fn (Programa $p) => ! $p->temCustoDireto())->count();
+        return $this->programas->filter->semCustoDireto()->count();
     }
 
     /** @return Collection<int, array{secretaria: Secretaria, total: float, quantidade: int, fracao: float}> */
@@ -161,7 +162,7 @@ class Panorama
             ->groupBy('ano_criacao');
     }
 
-    public function ultimaAtualizacao(): ?\Carbon\CarbonInterface
+    public function ultimaAtualizacao(): ?CarbonInterface
     {
         return $this->programas->max('updated_at');
     }

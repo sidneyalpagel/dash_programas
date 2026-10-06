@@ -2,7 +2,7 @@
     use App\Enums\TipoValor;
     use App\Support\Formato;
 
-    $semCusto = $panorama->programas->reject->temCustoDireto();
+    $semCusto = $panorama->programas->filter->semCustoDireto();
     $comCusto = $panorama->comCusto();
     $anualizados = $panorama->programas->where('tipo_valor', TipoValor::Anualizado);
     $milhoes = round($panorama->total() / 1_000_000, 1);
