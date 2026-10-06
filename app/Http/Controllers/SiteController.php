@@ -30,12 +30,16 @@ class SiteController extends Controller
             'secretaria' => Secretaria::where('slug', (string) $request->query('secretaria'))->first(),
             'tipo' => Mecanismo::tryFrom((string) $request->query('tipo')),
             'busca' => Str::limit(trim((string) $request->query('busca')), 80, ''),
+            // Só aceita grupos que existem (ex.: "Renda Santa Helena", "Fomento Paraná").
+            'grupo' => $panorama->programas->pluck('grupo')->filter()->unique()
+                ->first(fn (string $grupo) => $grupo === trim((string) $request->query('grupo'))),
         ];
 
         $ordem = in_array($request->query('ordem'), ['valor', 'nome'], true) ? $request->query('ordem') : 'nome';
 
         $programas = $panorama->programas
             ->when($filtros['perfil'], fn ($c, $perfil) => $c->filter(fn (Programa $p) => in_array($perfil->value, $p->publico_alvo ?? [], true)))
+            ->when($filtros['grupo'], fn ($c, $grupo) => $c->where('grupo', $grupo))
             ->when($filtros['secretaria'], fn ($c, $secretaria) => $c->where('secretaria_id', $secretaria->id))
             ->when($filtros['tipo'], fn ($c, $tipo) => $c->where('mecanismo', $tipo))
             ->when($filtros['busca'], fn ($c, $busca) => $c->filter(fn (Programa $p) => Str::contains(

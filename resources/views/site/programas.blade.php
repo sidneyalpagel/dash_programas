@@ -2,9 +2,12 @@
     use App\Enums\Mecanismo;
     use App\Support\Formato;
 
-    $titulo = $filtros['perfil']
-        ? 'Programas para: '.$filtros['perfil']->getLabel()
-        : ($filtros['secretaria'] ? $filtros['secretaria']->nome_curto : 'Todos os programas');
+    $titulo = match (true) {
+        (bool) $filtros['perfil'] => 'Programas para: '.$filtros['perfil']->getLabel(),
+        (bool) $filtros['grupo'] => $filtros['grupo'],
+        (bool) $filtros['secretaria'] => $filtros['secretaria']->nome_curto,
+        default => 'Todos os programas',
+    };
 
     $subtitulo = $filtros['secretaria']?->apresentacao
         ?? 'Escolha um perfil ou use os filtros para encontrar os programas que fazem sentido para você.';
@@ -13,13 +16,29 @@
     $secretariasResultado = $programas->pluck('secretaria_id')->unique()->count();
     $semCustoResultado = $programas->filter->semCustoDireto()->count();
 
-    $urlPerfil = fn (?string $perfil) => route('programas.index', array_filter([
-        'perfil' => $perfil,
+    // Estado atual da URL; cada filtro pode ser removido individualmente.
+    $consulta = array_filter([
+        'perfil' => $filtros['perfil']?->value,
+        'grupo' => $filtros['grupo'],
         'secretaria' => $filtros['secretaria']?->slug,
         'tipo' => $filtros['tipo']?->value,
         'busca' => $filtros['busca'] ?: null,
         'ordem' => $ordem !== 'nome' ? $ordem : null,
-    ]));
+    ]);
+    $semFiltro = fn (string ...$chaves) => route('programas.index', array_diff_key($consulta, array_flip($chaves)));
+
+    // Trocar de perfil recomeça a busca por texto e por grupo, para não somar filtros invisíveis.
+    $urlPerfil = fn (?string $perfil) => route('programas.index', array_filter(
+        ['perfil' => $perfil] + array_diff_key($consulta, array_flip(['perfil', 'busca', 'grupo'])),
+    ));
+
+    $ativos = array_filter([
+        'perfil' => $filtros['perfil'] ? 'Para: '.$filtros['perfil']->getLabel() : null,
+        'grupo' => $filtros['grupo'] ? 'Programa: '.$filtros['grupo'] : null,
+        'secretaria' => $filtros['secretaria'] ? 'Secretaria: '.$filtros['secretaria']->nome_curto : null,
+        'tipo' => $filtros['tipo'] ? 'Tipo: '.$filtros['tipo']->rotuloCurto() : null,
+        'busca' => $filtros['busca'] ? 'Busca: "'.$filtros['busca'].'"' : null,
+    ]);
 @endphp
 
 <x-layouts.site :titulo="$titulo" :panorama="$panorama">
@@ -62,9 +81,11 @@
     <div class="mx-auto max-w-6xl px-4 sm:px-6">
         {{-- Demais filtros --}}
         <form method="get" action="{{ route('programas.index') }}" class="card relative z-10 -mt-6 grid gap-4 p-4 shadow-lg shadow-black/5 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto] lg:items-end" role="search">
-            @if ($filtros['perfil'])
-                <input type="hidden" name="perfil" value="{{ $filtros['perfil']->value }}">
-            @endif
+            @foreach (['perfil', 'grupo'] as $oculto)
+                @isset($consulta[$oculto])
+                    <input type="hidden" name="{{ $oculto }}" value="{{ $consulta[$oculto] }}">
+                @endisset
+            @endforeach
             <label class="flex flex-col gap-1 text-sm">
                 <span class="font-medium text-ink-2">Buscar pelo nome</span>
                 <input type="search" name="busca" value="{{ $filtros['busca'] }}" placeholder="Ex.: transporte, bolsa, leite"
@@ -103,10 +124,30 @@
             </div>
         </form>
 
-        <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
+        @if ($ativos)
+            <ul class="mt-5 flex flex-wrap items-center gap-2 text-sm" aria-label="Filtros ativos">
+                @foreach ($ativos as $chave => $rotulo)
+                    <li>
+                        <a href="{{ $semFiltro($chave) }}" class="chip py-1.5" aria-label="Remover filtro {{ $rotulo }}">
+                            {{ $rotulo }} <span aria-hidden="true" class="text-muted">✕</span>
+                        </a>
+                    </li>
+                @endforeach
+                @if (count($ativos) > 1)
+                    <li><a href="{{ route('programas.index') }}" class="ml-1 font-medium">Limpar tudo</a></li>
+                @endif
+            </ul>
+        @endif
+
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
             <p class="text-ink-2">
                 @if ($programas->isEmpty())
-                    Nenhum programa encontrado com esses filtros. <a href="{{ route('programas.index') }}">Ver todos</a>.
+                    Nenhum programa encontrado com esses filtros.
+                    @if (count($ativos) > 1)
+                        Tente remover um deles acima ou <a href="{{ route('programas.index') }}">ver todos</a>.
+                    @else
+                        <a href="{{ route('programas.index') }}">Ver todos</a>.
+                    @endif
                 @else
                     <strong class="text-ink">{{ $programas->count() }} {{ $programas->count() === 1 ? 'programa' : 'programas' }}</strong>
                     @if ($totalResultado > 0)

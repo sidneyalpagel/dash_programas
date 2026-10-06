@@ -90,6 +90,38 @@ class SitePublicoTest extends TestCase
         $this->get('/')->assertSee('5 deles funcionam sem custo direto');
     }
 
+    public function test_perfil_nao_herda_busca_nem_grupo(): void
+    {
+        // Quem chega pela ficha ("Parte do Fomento Paraná") e depois escolhe um perfil
+        // não pode continuar preso à busca anterior.
+        $resposta = $this->get('/programas?busca=Fomento+Paran%C3%A1&secretaria=desenvolvimento-economico')
+            ->assertOk()
+            ->assertSee('3 programas')
+            ->assertSee('Busca: &quot;Fomento Paraná&quot;', false);
+
+        $linkPerfil = route('programas.index', ['perfil' => 'estudantes', 'secretaria' => 'desenvolvimento-economico']);
+        $resposta->assertSee('href="'.e($linkPerfil).'"', false);
+
+        $this->get('/programas?grupo=Fomento+Paran%C3%A1&perfil=mulheres')
+            ->assertOk()
+            ->assertSee('1 programa');
+    }
+
+    public function test_filtro_por_grupo(): void
+    {
+        $this->get('/programas?grupo=Renda+Santa+Helena')
+            ->assertOk()
+            ->assertSee('6 programas')
+            ->assertSee('Programa: Renda Santa Helena');
+
+        // Grupo inexistente é ignorado em vez de zerar a lista.
+        $this->get('/programas?grupo=Inexistente')->assertOk()->assertSee('42 programas');
+
+        $progredir = Programa::where('nome', 'Progredir')->first();
+        $this->get(route('programas.show', $progredir))
+            ->assertSee(e(route('programas.index', ['grupo' => 'Renda Santa Helena'])), false);
+    }
+
     public function test_rascunho_nao_aparece_no_site(): void
     {
         $programa = Programa::where('nome', 'Desenvolve Agro')->first();

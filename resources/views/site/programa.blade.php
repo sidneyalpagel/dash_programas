@@ -27,7 +27,7 @@
                 {{ $programa->mecanismo->getLabel() }}
             </span>
             @if ($programa->grupo)
-                <a href="{{ route('programas.index', ['busca' => $programa->grupo]) }}" class="rounded-full px-3 py-1 font-medium text-white no-underline ring-1 ring-white/30 hover:bg-white/10">
+                <a href="{{ route('programas.index', ['grupo' => $programa->grupo]) }}" class="rounded-full px-3 py-1 font-medium text-white no-underline ring-1 ring-white/30 hover:bg-white/10">
                     Parte do {{ $programa->grupo }}
                 </a>
             @endif
