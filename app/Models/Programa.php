@@ -23,23 +23,10 @@ use Illuminate\Support\Str;
     'qtd_atendidos', 'unidade_atendidos', 'qtd_beneficios', 'detalhe_atendidos',
     'tipo_valor', 'valor', 'valor_total_vigencia', 'vigencia_anos',
     'nota_publica', 'observacao_interna',
-    'status', 'alteracoes_pendentes', 'atualizado_por', 'publicado_em',
+    'status', 'atualizado_por', 'publicado_em',
 ])]
 class Programa extends Model
 {
-    /**
-     * Campos de conteúdo que um servidor de secretaria pode propor alterar.
-     * Status, slug e auditoria ficam de fora.
-     */
-    public const CAMPOS_CONTEUDO = [
-        'exercicio', 'nome', 'grupo',
-        'descricao', 'como_participar', 'bases_legais', 'ano_criacao',
-        'mecanismo', 'publico_alvo', 'fonte_recurso',
-        'qtd_atendidos', 'unidade_atendidos', 'qtd_beneficios', 'detalhe_atendidos',
-        'tipo_valor', 'valor', 'valor_total_vigencia', 'vigencia_anos',
-        'nota_publica', 'observacao_interna',
-    ];
-
     /** Ação registrada no histórico no próximo save (padrão: "editado"). */
     public ?string $acaoHistorico = null;
 
@@ -59,7 +46,6 @@ class Programa extends Model
             'valor' => 'decimal:2',
             'valor_total_vigencia' => 'decimal:2',
             'vigencia_anos' => 'integer',
-            'alteracoes_pendentes' => 'array',
             'publicado_em' => 'datetime',
         ];
     }
@@ -96,7 +82,7 @@ class Programa extends Model
         });
 
         static::updated(function (Programa $programa) {
-            $ignorar = ['updated_at', 'atualizado_por', 'alteracoes_pendentes'];
+            $ignorar = ['updated_at', 'atualizado_por'];
             $mudancas = [];
 
             foreach (array_diff(array_keys($programa->getChanges()), $ignorar) as $campo) {
@@ -155,7 +141,7 @@ class Programa extends Model
 
         $copia = $this->replicate([
             'valor', 'valor_total_vigencia', 'qtd_atendidos', 'qtd_beneficios', 'detalhe_atendidos',
-            'observacao_interna', 'alteracoes_pendentes', 'publicado_em', 'atualizado_por',
+            'observacao_interna', 'publicado_em', 'atualizado_por',
         ]);
         $copia->exercicio = $exercicio;
         $copia->status = StatusPrograma::Rascunho;
@@ -231,70 +217,9 @@ class Programa extends Model
         return $query->whereJsonContains('publico_alvo', $perfil->value);
     }
 
-    // Fluxo de publicação -----------------------------------------------
-
-    /**
-     * Guarda as alterações de um programa já publicado sem mexer no que o
-     * cidadão vê. Elas só entram no ar quando o administrador aprova.
-     */
-    public function proporAlteracoes(array $dados): void
-    {
-        $proposta = [];
-
-        foreach (self::CAMPOS_CONTEUDO as $campo) {
-            if (array_key_exists($campo, $dados)) {
-                $valor = $dados[$campo];
-                $proposta[$campo] = $valor instanceof \BackedEnum ? $valor->value : $valor;
-            }
-        }
-
-        $this->alteracoes_pendentes = $proposta;
-        $this->saveQuietly();
-        $this->registrarHistorico('alteração proposta', $this->diferencasPropostas());
-    }
-
-    /** Campos em que a proposta difere da versão publicada: [campo => [de, para]]. */
-    public function diferencasPropostas(): array
-    {
-        if (! $this->temAlteracaoPendente()) {
-            return [];
-        }
-
-        $diferencas = [];
-
-        foreach ($this->alteracoes_pendentes as $campo => $novo) {
-            $atual = $this->getAttribute($campo);
-            $atual = $atual instanceof \BackedEnum ? $atual->value : $atual;
-
-            if (in_array($campo, ['valor', 'valor_total_vigencia'], true)) {
-                $iguais = round((float) $atual, 2) === round((float) $novo, 2) && ($atual === null) === ($novo === null);
-            } else {
-                $iguais = json_encode($atual) === json_encode($novo) || ((string) $atual === (string) $novo && ! is_array($novo));
-            }
-
-            if (! $iguais) {
-                $diferencas[$campo] = ['de' => $atual, 'para' => $novo];
-            }
-        }
-
-        return $diferencas;
-    }
-
-    public function aprovarAlteracoes(): void
-    {
-        $this->fill($this->alteracoes_pendentes ?? []);
-        $this->alteracoes_pendentes = null;
-        $this->publicado_em = now();
-        $this->acaoHistorico = 'alteração aprovada';
-        $this->save();
-    }
-
-    public function descartarAlteracoes(): void
-    {
-        $this->alteracoes_pendentes = null;
-        $this->saveQuietly();
-        $this->registrarHistorico('alteração descartada');
-    }
+    // Publicação ----------------------------------------------------------
+    // A secretaria revisa o rascunho (pré-visualização) e publica ela mesma.
+    // Programa publicado: o que se salva vai ao site na hora.
 
     public function mudarStatus(StatusPrograma $status, string $acao): void
     {
@@ -310,9 +235,9 @@ class Programa extends Model
 
     // Regras de leitura --------------------------------------------------
 
-    public function temAlteracaoPendente(): bool
+    public function estaPublicado(): bool
     {
-        return filled($this->alteracoes_pendentes);
+        return $this->status === StatusPrograma::Publicado;
     }
 
     public function temCustoDireto(): bool

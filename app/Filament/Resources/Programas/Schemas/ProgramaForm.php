@@ -42,15 +42,15 @@ class ProgramaForm
         return $schema
             ->columns(1)
             ->components([
-                Callout::make('Este programa tem alterações aguardando revisão')
-                    ->description('O formulário mostra a versão que você enviou. O site continua exibindo a versão publicada até o administrador aprovar.')
-                    ->warning()
-                    ->visible(fn (?Programa $record) => $record?->temAlteracaoPendente() && ! auth()->user()->isAdmin()),
+                // Quem edita precisa saber se o que salvar vai direto ao ar.
+                Callout::make('Este programa está publicado no site')
+                    ->description('Ao clicar em "Salvar alterações", a nova versão aparece no site na hora.')
+                    ->info()
+                    ->visible(fn (?Programa $record) => $record?->estaPublicado() ?? false),
 
-                Callout::make('Há alterações propostas pela secretaria')
-                    ->description('O formulário mostra a versão publicada. Use o botão "Revisar alterações" no topo da página para comparar e aprovar.')
-                    ->warning()
-                    ->visible(fn (?Programa $record) => $record?->temAlteracaoPendente() && auth()->user()->isAdmin()),
+                Callout::make('Rascunho: ainda não aparece no site')
+                    ->description('Salve quantas vezes precisar. Confira com "Pré-visualizar" e clique em "Publicar no site" quando estiver pronto.')
+                    ->visible(fn (?Programa $record) => $record !== null && ! $record->estaPublicado()),
 
                 Section::make('1. Identificação')
                     ->description('Nome do programa e como ele funciona.')

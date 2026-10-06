@@ -97,9 +97,23 @@ class SiteController extends Controller
             ->with('secretaria')
             ->firstOrFail();
 
+        return $this->ficha($programa, $panorama);
+    }
+
+    /** A ficha como ficará no site, para quem edita o programa conferir antes de publicar. */
+    public function previa(Request $request, Programa $programa): View
+    {
+        abort_unless($request->user()->can('update', $programa), 403);
+
+        return $this->ficha($programa->load('secretaria'), new Panorama($programa->exercicio), previa: true);
+    }
+
+    private function ficha(Programa $programa, Panorama $panorama, bool $previa = false): View
+    {
         return view('site.programa', [
             'programa' => $programa,
             'panorama' => $panorama,
+            'previa' => $previa,
             'relacionados' => Programa::publicados()
                 ->doExercicio($programa->exercicio)
                 ->whereKeyNot($programa->id)

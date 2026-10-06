@@ -52,7 +52,7 @@ class ListProgramas extends ListRecords
                             $publicados = Programa::doExercicio($ano)->publicados()->count();
                             $pendentes = Programa::doExercicio($ano)->where('status', '!=', StatusPrograma::Publicado)->count();
 
-                            return [$ano => "{$publicados} publicados".($pendentes ? " · {$pendentes} em rascunho ou revisão" : '')];
+                            return [$ano => "{$publicados} publicados".($pendentes ? " · {$pendentes} em rascunho" : '')];
                         })
                         ->all())
                     ->helperText('Só aparecem anos com pelo menos um programa publicado.')

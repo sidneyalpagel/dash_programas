@@ -6,124 +6,65 @@ use App\Enums\StatusPrograma;
 use App\Filament\Actions\CopiarParaExercicio;
 use App\Filament\Resources\Programas\ProgramaResource;
 use App\Models\Programa;
-use App\Support\DescricaoAlteracao;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Database\Eloquent\Model;
 
 /**
+ * Quem cadastra também publica: revisa o rascunho com "Pré-visualizar" e
+ * clica em "Publicar no site". Em programa publicado, salvar atualiza o site.
+ *
  * @property Programa $record
  */
 class EditPrograma extends EditRecord
 {
     protected static string $resource = ProgramaResource::class;
 
-    private bool $foiProposta = false;
-
-    private function admin(): bool
-    {
-        return auth()->user()->isAdmin();
-    }
-
-    /** O servidor continua editando a versão que propôs, não a publicada. */
-    protected function mutateFormDataBeforeFill(array $data): array
-    {
-        if (! $this->admin() && $this->record->temAlteracaoPendente()) {
-            return array_merge($data, $this->record->alteracoes_pendentes);
-        }
-
-        return $data;
-    }
-
-    protected function handleRecordUpdate(Model $record, array $data): Model
-    {
-        /** @var Programa $record */
-        if (! $this->admin() && $record->status === StatusPrograma::Publicado) {
-            $record->proporAlteracoes($data);
-            $this->foiProposta = true;
-
-            return $record;
-        }
-
-        return parent::handleRecordUpdate($record, $data);
-    }
-
     protected function getSavedNotificationTitle(): ?string
     {
-        return $this->foiProposta
-            ? 'Alterações enviadas para revisão. O site continua mostrando a versão publicada até a aprovação.'
-            : 'Programa salvo.';
+        return $this->record->estaPublicado()
+            ? 'Alterações salvas e já publicadas no site.'
+            : 'Rascunho salvo. Use "Pré-visualizar" para conferir e "Publicar no site" quando estiver pronto.';
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('revisar')
-                ->label('Revisar alterações')
-                ->icon(Heroicon::OutlinedDocumentMagnifyingGlass)
-                ->color('warning')
-                ->visible(fn () => $this->admin() && $this->record->temAlteracaoPendente())
-                ->modalHeading('Alterações propostas pela secretaria')
-                ->modalDescription('Compare a versão publicada com a proposta. Ao aprovar, a nova versão entra no ar imediatamente.')
-                ->modalContent(fn () => view('filament.revisao-alteracoes', [
-                    'linhas' => DescricaoAlteracao::linhas($this->record->diferencasPropostas()),
-                    'rotuloDe' => 'Publicado hoje',
-                    'rotuloPara' => 'Proposta da secretaria',
-                ]))
-                ->modalWidth('4xl')
-                ->modalSubmitActionLabel('Aprovar e publicar')
-                ->action(function () {
-                    $this->record->aprovarAlteracoes();
-                    $this->refreshFormData(array_keys($this->record->getAttributes()));
-                    Notification::make()->title('Alterações aprovadas e publicadas.')->success()->send();
-                })
-                ->extraModalFooterActions(fn (Action $action) => [
-                    $action->makeModalSubmitAction('descartar', ['descartar' => true])
-                        ->label('Descartar proposta')
-                        ->color('danger'),
-                ])
-                ->before(function (array $arguments, Action $action) {
-                    if ($arguments['descartar'] ?? false) {
-                        $this->record->descartarAlteracoes();
-                        Notification::make()->title('Proposta descartada.')->send();
-                        $action->cancel();
-                    }
-                }),
-
-            Action::make('enviarRevisao')
-                ->label('Enviar para revisão')
-                ->icon(Heroicon::OutlinedPaperAirplane)
-                ->visible(fn () => ! $this->admin() && $this->record->status === StatusPrograma::Rascunho)
-                ->requiresConfirmation()
-                ->modalDescription('O administrador vai revisar a ficha antes de publicá-la no site. Você ainda poderá editar enquanto isso.')
-                ->action(function () {
-                    $this->save(shouldRedirect: false, shouldSendSavedNotification: false);
-                    $this->record->mudarStatus(StatusPrograma::EmRevisao, 'enviado para revisão');
-                    Notification::make()->title('Enviado para revisão.')->success()->send();
-                }),
+            Action::make('previa')
+                ->label('Pré-visualizar')
+                ->icon(Heroicon::OutlinedEye)
+                ->color('gray')
+                ->visible(fn () => ! $this->record->estaPublicado())
+                ->url(fn () => route('previa.programa', $this->record), shouldOpenInNewTab: true),
 
             Action::make('publicar')
                 ->label('Publicar no site')
                 ->icon(Heroicon::OutlinedGlobeAlt)
                 ->color('success')
-                ->visible(fn () => $this->admin() && $this->record->status !== StatusPrograma::Publicado)
+                ->visible(fn () => ! $this->record->estaPublicado())
                 ->requiresConfirmation()
-                ->modalDescription('A ficha ficará visível para qualquer cidadão no site.')
+                ->modalHeading('Publicar no site?')
+                ->modalDescription(function () {
+                    $faltando = $this->record->pendencias();
+
+                    return 'A ficha ficará visível para qualquer cidadão. Confira antes com "Pré-visualizar".'
+                        .($faltando ? ' Ainda falta: '.implode(', ', $faltando).'.' : '');
+                })
+                ->modalSubmitActionLabel('Publicar')
                 ->action(function () {
                     $this->save(shouldRedirect: false, shouldSendSavedNotification: false);
                     $this->record->mudarStatus(StatusPrograma::Publicado, 'publicado');
-                    Notification::make()->title('Programa publicado.')->success()->send();
+                    Notification::make()->title('Programa publicado no site.')->success()->send();
                 }),
 
             Action::make('verNoSite')
                 ->label('Ver no site')
                 ->icon(Heroicon::OutlinedArrowTopRightOnSquare)
                 ->color('gray')
-                ->visible(fn () => $this->record->status === StatusPrograma::Publicado)
+                ->visible(fn () => $this->record->estaPublicado())
                 ->url(fn () => $this->record->urlPublica(), shouldOpenInNewTab: true),
 
             ActionGroup::make([
@@ -131,15 +72,13 @@ class EditPrograma extends EditRecord
                 Action::make('despublicar')
                     ->label('Tirar do site (voltar a rascunho)')
                     ->icon(Heroicon::OutlinedEyeSlash)
-                    ->visible(fn () => $this->admin() && $this->record->status === StatusPrograma::Publicado)
+                    ->visible(fn () => $this->record->estaPublicado())
                     ->requiresConfirmation()
-                    ->action(fn () => $this->record->mudarStatus(StatusPrograma::Rascunho, 'retirado do site')),
-                Action::make('devolver')
-                    ->label('Devolver para a secretaria')
-                    ->icon(Heroicon::OutlinedArrowUturnLeft)
-                    ->visible(fn () => $this->admin() && $this->record->status === StatusPrograma::EmRevisao)
-                    ->requiresConfirmation()
-                    ->action(fn () => $this->record->mudarStatus(StatusPrograma::Rascunho, 'devolvido para ajustes')),
+                    ->modalDescription('A ficha deixa de aparecer no site e volta a ser rascunho. Você pode publicá-la de novo depois.')
+                    ->action(function () {
+                        $this->record->mudarStatus(StatusPrograma::Rascunho, 'retirado do site');
+                        Notification::make()->title('Programa retirado do site.')->send();
+                    }),
                 DeleteAction::make(),
             ]),
         ];

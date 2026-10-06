@@ -14,6 +14,17 @@
 @endphp
 
 <x-layouts.site :titulo="$programa->nome" :descricao="$programa->descricao" :panorama="$panorama">
+    @if ($previa ?? false)
+        <div class="sticky top-0 z-40 bg-warn-bg text-warn-ink shadow-sm" role="status">
+            <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2.5 text-sm sm:px-6">
+                <p>
+                    <strong>Pré-visualização.</strong>
+                    {{ $programa->estaPublicado() ? 'Esta é a ficha publicada.' : 'Esta ficha ainda não está no site: só quem tem acesso ao painel a vê.' }}
+                </p>
+                <a href="{{ \App\Filament\Resources\Programas\ProgramaResource::getUrl('edit', ['record' => $programa]) }}" class="font-semibold text-warn-ink">Voltar ao painel →</a>
+            </div>
+        </div>
+    @endif
     <x-cabecalho-pagina :titulo="$programa->nome">
         <x-slot:trilha>
             <a href="{{ $panorama->rota('programas.index') }}" class="text-white/85 hover:text-white">Programas</a>

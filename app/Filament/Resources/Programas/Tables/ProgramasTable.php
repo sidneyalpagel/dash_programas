@@ -11,9 +11,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class ProgramasTable
 {
@@ -56,18 +54,6 @@ class ProgramasTable
                     ->label('Situação')
                     ->badge()
                     ->sortable(),
-                // Só aparece quando há proposta; sem proposta a célula fica vazia
-                // (um ícone de "não" seria lido como erro ou exclusão).
-                TextColumn::make('alteracao_proposta')
-                    ->label('Alteração proposta')
-                    ->state(fn (Programa $record) => $record->temAlteracaoPendente() ? 'Aguardando revisão' : null)
-                    ->badge()
-                    ->color('warning')
-                    ->icon('heroicon-m-clock')
-                    ->tooltip(fn (Programa $record) => $record->temAlteracaoPendente()
-                        ? 'A secretaria propôs mudanças. Abra o programa e clique em "Revisar alterações".'
-                        : null)
-                    ->toggleable(),
                 TextColumn::make('exercicio')
                     ->label('Ano')
                     ->sortable()
@@ -91,12 +77,6 @@ class ProgramasTable
                 SelectFilter::make('exercicio')
                     ->label('Ano')
                     ->options(fn () => Programa::query()->distinct()->orderByDesc('exercicio')->pluck('exercicio', 'exercicio')->all()),
-                TernaryFilter::make('alteracao')
-                    ->label('Alteração proposta')
-                    ->queries(
-                        true: fn (Builder $query) => $query->whereNotNull('alteracoes_pendentes'),
-                        false: fn (Builder $query) => $query->whereNull('alteracoes_pendentes'),
-                    ),
             ])
             ->recordActions([
                 EditAction::make(),

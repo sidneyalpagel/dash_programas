@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Programas;
 
+use App\Enums\StatusPrograma;
 use App\Filament\Resources\Programas\Pages\CreatePrograma;
 use App\Filament\Resources\Programas\Pages\EditPrograma;
 use App\Filament\Resources\Programas\Pages\ListProgramas;
@@ -58,20 +59,14 @@ class ProgramaResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        if (! auth()->user()?->isAdmin()) {
-            return null;
-        }
+        $rascunhos = static::getEloquentQuery()->where('status', StatusPrograma::Rascunho)->count();
 
-        $aguardando = Programa::query()
-            ->where(fn (Builder $q) => $q->where('status', 'em_revisao')->orWhereNotNull('alteracoes_pendentes'))
-            ->count();
-
-        return $aguardando ?: null;
+        return $rascunhos ?: null;
     }
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return 'Aguardando sua revisão';
+        return 'Rascunhos ainda não publicados';
     }
 
     public static function getRelations(): array

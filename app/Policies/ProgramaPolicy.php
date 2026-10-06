@@ -7,8 +7,9 @@ use App\Models\Programa;
 use App\Models\User;
 
 /**
- * Administrador vê e edita tudo. Servidor de secretaria só mexe nos
- * programas da própria secretaria e não publica nem exclui o que já foi publicado.
+ * Administrador vê e edita tudo. Servidor de secretaria cadastra, publica e
+ * tira do site os programas da própria secretaria; só não exclui o que já
+ * esteve publicado (para isso, "Tirar do site").
  */
 class ProgramaPolicy
 {
@@ -48,8 +49,9 @@ class ProgramaPolicy
         return $user->isAdmin();
     }
 
-    public function publicar(User $user): bool
+    /** Publicar ou tirar do site: quem pode editar o programa. */
+    public function publicar(User $user, Programa $programa): bool
     {
-        return $user->isAdmin();
+        return $this->update($user, $programa);
     }
 }

@@ -5,17 +5,16 @@ namespace App\Enums;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
+/** Rascunho: só o painel vê (revisado pela pré-visualização). Publicado: está no site. */
 enum StatusPrograma: string implements HasLabel, HasColor
 {
     case Rascunho = 'rascunho';
-    case EmRevisao = 'em_revisao';
     case Publicado = 'publicado';
 
     public function getLabel(): string
     {
         return match ($this) {
             self::Rascunho => 'Rascunho',
-            self::EmRevisao => 'Aguardando revisão',
             self::Publicado => 'Publicado',
         };
     }
@@ -24,7 +23,6 @@ enum StatusPrograma: string implements HasLabel, HasColor
     {
         return match ($this) {
             self::Rascunho => 'gray',
-            self::EmRevisao => 'warning',
             self::Publicado => 'success',
         };
     }

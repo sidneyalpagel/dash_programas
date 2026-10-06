@@ -13,6 +13,11 @@ $paginas = function () {
 
 Route::controller(SiteController::class)->group($paginas);
 
+// Pré-visualização de um rascunho, só para quem pode editá-lo no painel.
+Route::get('/previa/programas/{programa:id}', [SiteController::class, 'previa'])
+    ->middleware('auth')
+    ->name('previa.programa');
+
 Route::controller(SiteController::class)
     ->prefix('{ano}')
     ->whereNumber('ano')

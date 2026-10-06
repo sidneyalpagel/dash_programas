@@ -25,7 +25,7 @@ class CreatePrograma extends CreateRecord
 
     protected function getCreatedNotificationTitle(): ?string
     {
-        return 'Programa salvo como rascunho. Quando terminar, clique em "Enviar para revisão".';
+        return 'Programa salvo como rascunho. Confira com "Pré-visualizar" e clique em "Publicar no site" quando estiver pronto.';
     }
 
     protected function getRedirectUrl(): string

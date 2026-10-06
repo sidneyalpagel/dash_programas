@@ -1,16 +1,9 @@
 @php
-    $admin = auth()->user()->isAdmin();
-    $passos = $admin
-        ? [
-            ['Revise', 'Programas "Aguardando revisão" e com alterações propostas aparecem com um número no menu Programas.'],
-            ['Compare', 'Abra o programa e clique em "Revisar alterações" para ver o antes e depois, campo a campo.'],
-            ['Publique', 'Aprove a proposta ou clique em "Publicar no site". O site é atualizado na hora.'],
-        ]
-        : [
-            ['Cadastre ou atualize', 'Em Programas, crie um novo ou abra um existente. Escreva como se explicasse para um vizinho.'],
-            ['Envie para revisão', 'Programas novos começam como rascunho. Quando terminar, clique em "Enviar para revisão".'],
-            ['Acompanhe', 'Se o programa já está no site, suas alterações ficam guardadas até o administrador aprovar.'],
-        ];
+    $passos = [
+        ['Cadastre como rascunho', 'Em Programas, crie um novo ou abra um existente. Escreva como se explicasse para um vizinho.'],
+        ['Confira', 'Clique em "Pré-visualizar" para ver a ficha exatamente como ficará no site.'],
+        ['Publique', 'Clique em "Publicar no site". Depois, cada alteração salva aparece no site na hora.'],
+    ];
 @endphp
 
 <x-filament-widgets::widget>
@@ -27,6 +20,8 @@
             @endforeach
         </ol>
         <p style="font-size: .875rem; margin: 1rem 0 0">
+            <a href="{{ \App\Filament\Pages\ManualDoCadastrador::getUrl() }}" style="color: var(--primary-600); font-weight: 500">Ler o manual do cadastrador</a>
+            <span style="opacity: .4; margin: 0 .5rem">·</span>
             <a href="{{ url('/') }}" target="_blank" style="color: var(--primary-600); font-weight: 500">Abrir o site público ↗</a>
         </p>
     </x-filament::section>

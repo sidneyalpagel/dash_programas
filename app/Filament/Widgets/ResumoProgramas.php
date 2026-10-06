@@ -19,16 +19,16 @@ class ResumoProgramas extends StatsOverviewWidget
         $exibido = Panorama::exercicioExibido();
         // Publicados: só o ano que o site mostra, para não somar exercícios diferentes.
         $publicados = $programas->where('status', StatusPrograma::Publicado)->where('exercicio', $exibido);
-        // Pendências e revisões: todos os anos (inclui rascunhos do próximo exercício).
+        // Rascunhos e pendências: todos os anos (inclui o próximo exercício em preparação).
         $incompletos = $programas->filter(fn ($p) => $p->pendencias() !== [])->count();
-        $aguardando = $programas->filter(fn ($p) => $p->status === StatusPrograma::EmRevisao || $p->temAlteracaoPendente())->count();
+        $rascunhos = $programas->where('status', StatusPrograma::Rascunho)->count();
 
         return [
             Stat::make("Publicados em {$exibido}", $publicados->count())
                 ->description(Formato::moedaCurta($publicados->sum('valor')).' no site'),
-            Stat::make('Aguardando revisão', $aguardando)
-                ->description(auth()->user()->isAdmin() ? 'Revise e publique' : 'Com o administrador')
-                ->color($aguardando ? 'warning' : 'gray'),
+            Stat::make('Rascunhos', $rascunhos)
+                ->description('Ainda não publicados: confira e publique')
+                ->color($rascunhos ? 'warning' : 'gray'),
             Stat::make('Fichas a completar', $incompletos)
                 ->description('Faltam informações para o cidadão')
                 ->color($incompletos ? 'danger' : 'success'),

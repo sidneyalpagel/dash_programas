@@ -1,10 +1,10 @@
 # Programas Municipais · Santa Helena - PR
 
 Site público que explica ao cidadão os programas da Prefeitura: quanto custam, quem atendem e como participar.
-As secretarias cadastram e atualizam os programas num painel com login, e o administrador revisa antes de publicar.
+As secretarias cadastram, conferem e publicam os próprios programas num painel com login.
 
 - **Site público:** `/` (panorama), `/programas` (lista com filtros "para mim"), `/programas/{programa}` (ficha), `/entenda` (glossário e metodologia)
-- **Painel:** `/admin`
+- **Painel:** `/admin` — inclui o **Manual do cadastrador** (`/admin/manual`, texto em `resources/manual/manual-do-cadastrador.md`)
 
 Laravel 13 · Filament 5 · Tailwind 4 · MySQL/MariaDB (produção) ou SQLite (desenvolvimento).
 
@@ -12,8 +12,8 @@ Laravel 13 · Filament 5 · Tailwind 4 · MySQL/MariaDB (produção) ou SQLite (
 
 | Quem | Pode |
 |---|---|
-| **Servidor de secretaria** | Ver e editar só os programas da própria secretaria. Programa novo nasce como *rascunho* → "Enviar para revisão". Se o programa já está publicado, a edição vira uma **proposta**: o site continua mostrando a versão publicada até a aprovação. |
-| **Administrador** | Tudo. Revisa propostas campo a campo ("Revisar alterações" → aprovar ou descartar), publica, tira do site, gerencia secretarias e usuários. |
+| **Servidor de secretaria** | Ver e editar só os programas da própria secretaria. Programa novo nasce como *rascunho* (não aparece no site). Confere em **Pré-visualizar** (`/previa/programas/{id}`, só para quem pode editar) e clica em **Publicar no site**. Em programa publicado, salvar atualiza o site na hora. Pode **Tirar do site** (volta a rascunho); só exclui rascunhos que nunca foram publicados. |
+| **Administrador** | Tudo o que o servidor faz, em todas as secretarias, mais: gerencia secretarias e usuários e escolhe o exercício exibido no site. |
 
 Toda alteração fica registrada no **histórico** do programa (quem, quando, o quê).
 
@@ -34,8 +34,8 @@ Cada programa pertence a um exercício. O mesmo programa em anos diferentes são
 1. Em *Programas*, filtre por **Ano = 2025**, selecione todos e use **"Copiar para outro exercício"** → 2026.
    As secretarias também podem fazer isso com os próprios programas. Cada cópia vira **rascunho** com descrição, como participar,
    leis, público e tipo; **valor e quantidades ficam em branco**.
-2. Cada secretaria filtra por Ano = 2026, completa valores e atendidos (as fichas aparecem em "a completar") e envia para revisão.
-3. O administrador revisa e publica. Enquanto isso o site continua mostrando 2025.
+2. Cada secretaria filtra por Ano = 2026, completa valores e atendidos (as fichas aparecem em "a completar"), confere em Pré-visualizar e publica.
+3. Enquanto isso o site continua mostrando 2025 (os programas de 2026 publicados ficam em `/2026`).
 4. Quando 2026 estiver completo, troque em *Programas → "No site"* para 2026. O 2025 continua disponível em `/2025`.
 
 Anos anteriores (ex.: 2024) são cadastrados normalmente, escolhendo o ano no formulário, ou copiando de 2025 e ajustando os números.

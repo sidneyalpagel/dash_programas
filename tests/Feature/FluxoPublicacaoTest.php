@@ -61,7 +61,7 @@ class FluxoPublicacaoTest extends TestCase
         $this->actingAs(User::factory()->create())->get('/admin')->assertForbidden();
     }
 
-    public function test_alteracao_em_programa_publicado_aguarda_aprovacao(): void
+    public function test_edicao_de_programa_publicado_vai_direto_ao_site(): void
     {
         $programa = $this->programa('Incentivo para Apicultores');
 
@@ -73,50 +73,21 @@ class FluxoPublicacaoTest extends TestCase
                 'valor' => '200.000,00',
             ])
             ->call('save')
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertNotified('Alterações salvas e já publicadas no site.');
 
         $programa->refresh();
 
-        // O site continua com a versão publicada.
-        $this->assertNull($programa->como_participar);
-        $this->assertEquals(168000, (float) $programa->valor);
-        $this->assertTrue($programa->temAlteracaoPendente());
-        $this->assertSame(
-            ['como_participar', 'valor'],
-            array_keys($programa->diferencasPropostas()),
-        );
-        $this->get('/programas/incentivo-para-apicultores')->assertDontSee('Apicultores cadastrados');
-
-        // O administrador aprova.
-        $this->actingAs($this->admin);
-
-        Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
-            ->callAction('revisar');
-
-        $programa->refresh();
-
-        $this->assertFalse($programa->temAlteracaoPendente());
         $this->assertEquals(200000, (float) $programa->valor);
+        $this->assertTrue($programa->estaPublicado());
         $this->get('/programas/incentivo-para-apicultores')->assertSee('Apicultores cadastrados');
-        $this->assertTrue($programa->historicos()->where('acao', 'alteração aprovada')->exists());
+
+        $alteracao = $programa->historicos()->where('acao', 'editado')->first();
+        $this->assertSame(['como_participar', 'valor'], array_keys($alteracao->alteracoes));
+        $this->assertSame($this->agricultura->id, $alteracao->user_id);
     }
 
-    public function test_administrador_pode_descartar_proposta(): void
-    {
-        $programa = $this->programa('Incentivo para Pescadores');
-        $programa->proporAlteracoes(['nome' => 'Outro nome']);
-
-        $this->actingAs($this->admin);
-
-        Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
-            ->callAction('revisar', arguments: ['descartar' => true]);
-
-        $programa->refresh();
-        $this->assertFalse($programa->temAlteracaoPendente());
-        $this->assertSame('Incentivo para Pescadores', $programa->nome);
-    }
-
-    public function test_programa_novo_vai_de_rascunho_a_publicado(): void
+    public function test_secretaria_cadastra_confere_e_publica_sozinha(): void
     {
         $this->actingAs($this->agricultura);
 
@@ -142,18 +113,51 @@ class FluxoPublicacaoTest extends TestCase
         $this->assertEquals(250000, (float) $programa->valor);
         $this->get('/programas/programa-de-teste-rural')->assertNotFound();
 
-        Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
-            ->assertActionHidden('publicar')
-            ->callAction('enviarRevisao');
-
-        $this->assertSame(StatusPrograma::EmRevisao, $programa->refresh()->status);
-
-        $this->actingAs($this->admin);
+        // Pré-visualização: a ficha como ficará, só para quem edita.
+        $this->get(route('previa.programa', $programa))
+            ->assertOk()
+            ->assertSee('Pré-visualização')
+            ->assertSee('R$ 250.000,00');
 
         Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
-            ->callAction('publicar');
+            ->assertActionVisible('previa')
+            ->callAction('publicar')
+            ->assertNotified('Programa publicado no site.');
 
         $this->assertSame(StatusPrograma::Publicado, $programa->refresh()->status);
         $this->get('/programas/programa-de-teste-rural')->assertOk()->assertSee('R$ 250.000,00');
+
+        // E pode tirar do site.
+        Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
+            ->assertActionHidden('previa')
+            ->callAction('despublicar');
+
+        $this->assertSame(StatusPrograma::Rascunho, $programa->refresh()->status);
+        $this->get('/programas/programa-de-teste-rural')->assertNotFound();
+    }
+
+    public function test_previa_exige_login_e_permissao(): void
+    {
+        $merenda = $this->programa('Merenda Escolar');
+
+        $this->get(route('previa.programa', $merenda))->assertRedirect('/admin/login');
+
+        $this->actingAs($this->agricultura)
+            ->get(route('previa.programa', $merenda))
+            ->assertForbidden();
+
+        $this->actingAs($this->admin)
+            ->get(route('previa.programa', $merenda))
+            ->assertOk();
+    }
+
+    public function test_servidor_nao_exclui_programa_que_ja_foi_publicado(): void
+    {
+        $programa = $this->programa('Incentivo para Pescadores');
+
+        $this->actingAs($this->agricultura);
+
+        Livewire::test(EditPrograma::class, ['record' => $programa->getKey()])
+            ->assertActionHidden('delete');
     }
 }
