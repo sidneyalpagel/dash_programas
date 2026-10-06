@@ -4,7 +4,22 @@ Site público que explica ao cidadão os programas da Prefeitura: quanto custam,
 As secretarias cadastram, conferem e publicam os próprios programas num painel com login.
 
 - **Site público:** `/` (panorama), `/programas` (lista com filtros "para mim"), `/programas/{programa}` (ficha), `/entenda` (glossário e metodologia)
-- **Painel:** `/admin` — inclui o **Manual do cadastrador** (`/admin/manual`, texto em `resources/manual/manual-do-cadastrador.md`)
+- **Painel:** `/admin`
+- **Manual do cadastrador:** `/manual` (link no menu do painel e na tela de login; botões Imprimir e Baixar PDF)
+
+### Manual do cadastrador
+
+A página fica em `resources/views/manual.blade.php`. As telas (`public/manual-img`) e o PDF (`public/arquivos/manual-do-cadastrador.pdf`)
+são gerados a partir do sistema rodando localmente, com o Chrome instalado:
+
+```bash
+php artisan migrate:fresh --seed   # usuários de teste: admin / agricultura, senha "password"
+php artisan serve
+# no painel local, copie o "Viabiliza Agro" para 2026 e preencha valor e atendidos (rascunho de exemplo)
+npm run manual                     # telas + PDF  (ou: npm run manual -- telas | pdf)
+```
+
+Depois de mudar telas do painel ou o texto do manual, rode `npm run manual` e faça commit das imagens e do PDF.
 
 Laravel 13 · Filament 5 · Tailwind 4 · MySQL/MariaDB (produção) ou SQLite (desenvolvimento).
 

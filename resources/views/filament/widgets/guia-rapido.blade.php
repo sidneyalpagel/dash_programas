@@ -20,7 +20,7 @@
             @endforeach
         </ol>
         <p style="font-size: .875rem; margin: 1rem 0 0">
-            <a href="{{ \App\Filament\Pages\ManualDoCadastrador::getUrl() }}" style="color: var(--primary-600); font-weight: 500">Ler o manual do cadastrador</a>
+            <a href="{{ route('manual') }}" target="_blank" style="color: var(--primary-600); font-weight: 500">Ler o manual do cadastrador ↗</a>
             <span style="opacity: .4; margin: 0 .5rem">·</span>
             <a href="{{ url('/') }}" target="_blank" style="color: var(--primary-600); font-weight: 500">Abrir o site público ↗</a>
         </p>

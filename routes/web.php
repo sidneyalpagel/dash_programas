@@ -13,6 +13,9 @@ $paginas = function () {
 
 Route::controller(SiteController::class)->group($paginas);
 
+// Manual do cadastrador (página própria, imprimível; o PDF (public/arquivos) é gerado por `npm run manual`).
+Route::view('/manual', 'manual')->name('manual');
+
 // Pré-visualização de um rascunho, só para quem pode editá-lo no painel.
 Route::get('/previa/programas/{programa:id}', [SiteController::class, 'previa'])
     ->middleware('auth')

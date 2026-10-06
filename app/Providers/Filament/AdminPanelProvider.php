@@ -22,7 +22,9 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\View\PanelsRenderHook;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -46,11 +48,20 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth('7xl')
             ->sidebarCollapsibleOnDesktop()
             ->navigationItems([
+                NavigationItem::make('Manual do cadastrador')
+                    ->url('/manual', shouldOpenInNewTab: true)
+                    ->icon(Heroicon::OutlinedBookOpen)
+                    ->sort(2),
                 NavigationItem::make('Ver o site público')
                     ->url('/', shouldOpenInNewTab: true)
                     ->icon(Heroicon::OutlinedGlobeAlt)
                     ->sort(99),
             ])
+            // Na tela de login, o caminho para o manual (como no painel de obras).
+            ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn () => new HtmlString('<p style="text-align:center;font-size:.875rem;margin-top:1rem"><a href="/manual" style="color:var(--primary-600);font-weight:500">Manual do cadastrador</a></p>'),
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

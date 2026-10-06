@@ -2,41 +2,25 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Pages\ManualDoCadastrador;
-use App\Models\Secretaria;
-use App\Models\User;
-use Database\Seeders\SecretariaSeeder;
-use Filament\Facades\Filament;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ManualTest extends TestCase
 {
-    use RefreshDatabase;
-
-    public function test_manual_abre_no_painel_para_quem_cadastra(): void
+    public function test_manual_do_cadastrador_abre_com_capitulos_e_telas(): void
     {
-        $this->seed(SecretariaSeeder::class);
-        Filament::setCurrentPanel('admin');
-
-        $servidor = User::factory()->create([
-            'secretaria_id' => Secretaria::where('slug', 'educacao')->value('id'),
-        ]);
-
-        $this->actingAs($servidor)
-            ->get(ManualDoCadastrador::getUrl())
+        $this->get('/manual')
             ->assertOk()
             ->assertSee('Manual do cadastrador')
-            ->assertSee('href="#acesso-ao-painel"', false)
-            ->assertSee('id="virada-de-ano"', false)
+            ->assertSee('href="#acesso"', false)
+            ->assertSee('id="virada"', false)
             ->assertSee('Você confere e publica: rascunho não aparece no site')
-            ->assertSee('Pré-visualizar')
-            ->assertDontSee('[[diagrama-fluxo]]')
+            ->assertSee('manual-img/05-rascunho-topo.png', false)
+            ->assertSee('window.print()', false)
             ->assertDontSee('Enviar para revisão');
     }
 
-    public function test_manual_exige_login(): void
+    public function test_login_do_painel_aponta_para_o_manual(): void
     {
-        $this->get('/admin/manual')->assertRedirect();
+        $this->get('/admin/login')->assertOk()->assertSee('href="/manual"', false);
     }
 }

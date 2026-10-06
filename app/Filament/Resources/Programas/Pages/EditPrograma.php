@@ -46,6 +46,7 @@ class EditPrograma extends EditRecord
                 ->color('success')
                 ->visible(fn () => ! $this->record->estaPublicado())
                 ->requiresConfirmation()
+                ->modalIcon(Heroicon::OutlinedGlobeAlt)
                 ->modalHeading('Publicar no site?')
                 ->modalDescription(function () {
                     $faltando = $this->record->pendencias();

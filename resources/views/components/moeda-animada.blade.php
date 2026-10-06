@@ -10,5 +10,5 @@
 @if ($partes['unidade'] === null)
     {{ \App\Support\Formato::moeda($valor) }}
 @else
-    <x-numero-animado :valor="$partes['numero']" :casas="$partes['casas']" prefixo="R$ " /><span class="{{ $classeUnidade }}"> {{ $partes['abreviada'] }}</span>
+    <span class="whitespace-nowrap"><x-numero-animado :valor="$partes['numero']" :casas="$partes['casas']" prefixo="R$ " /><span class="{{ $classeUnidade }}">&nbsp;{{ $partes['abreviada'] }}</span></span>
 @endif
