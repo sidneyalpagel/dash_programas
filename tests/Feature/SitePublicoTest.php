@@ -43,7 +43,7 @@ class SitePublicoTest extends TestCase
     {
         $fomento = Programa::where('nome', 'Programa Municipal de Fomento ao Esporte')->first();
 
-        $this->get(route('programas.show', $fomento))
+        $this->get($fomento->urlPublica())
             ->assertOk()
             ->assertSee('Como o dinheiro chega')
             ->assertSee(Mecanismo::IncentivoProdutivo->explicacaoNaFicha())
@@ -54,7 +54,7 @@ class SitePublicoTest extends TestCase
     {
         $credito = Programa::where('nome', 'Fomento Paraná - Micro Fácil')->first();
 
-        $this->get(route('programas.show', $credito))
+        $this->get($credito->urlPublica())
             ->assertOk()
             ->assertSee('Como funciona')
             ->assertDontSee('Como o dinheiro chega')
@@ -68,11 +68,11 @@ class SitePublicoTest extends TestCase
         $fomento = Programa::where('nome', 'Programa Municipal de Fomento ao Esporte')->first();
         $tendas = Programa::where('nome', 'Assuntos Comunitários - Tendas')->first();
 
-        $this->get(route('programas.show', $fomento))
+        $this->get($fomento->urlPublica())
             ->assertSee('Valor do ano dividido por 7 associações.')
             ->assertSee('Outros programas da Secretaria Municipal de Esportes e Lazer');
 
-        $this->get(route('programas.show', $tendas))
+        $this->get($tendas->urlPublica())
             ->assertDontSee('em média')
             ->assertSee('menos de 0,1% de tudo');
     }
@@ -82,7 +82,7 @@ class SitePublicoTest extends TestCase
         $bolsa = Programa::where('nome', 'Programa Bolsa Atleta Municipal')->first();
         $bolsa->update(['valor' => null]);
 
-        $this->get(route('programas.show', $bolsa))
+        $this->get($bolsa->urlPublica())
             ->assertOk()
             ->assertSee('A informar')
             ->assertDontSee('Sem custo direto');
@@ -118,7 +118,7 @@ class SitePublicoTest extends TestCase
         $this->get('/programas?grupo=Inexistente')->assertOk()->assertSee('42 programas');
 
         $progredir = Programa::where('nome', 'Progredir')->first();
-        $this->get(route('programas.show', $progredir))
+        $this->get($progredir->urlPublica())
             ->assertSee(e(route('programas.index', ['grupo' => 'Renda Santa Helena'])), false);
     }
 

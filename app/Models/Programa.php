@@ -50,10 +50,8 @@ class Programa extends Model
         ];
     }
 
-    public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
+    // Chave de rota = id (padrão). O slug se repete entre exercícios; o site
+    // público monta seus endereços com urlPublica(), nunca pela chave de rota.
 
     protected static function booted(): void
     {

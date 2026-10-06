@@ -52,6 +52,12 @@ class FluxoPublicacaoTest extends TestCase
             ->assertCanSeeTableRecords([$this->programa('Desenvolve Agro')])
             ->assertCanNotSeeTableRecords([$this->programa('Merenda Escolar')]);
 
+        // O link "Editar" da lista abre a página (endereço pelo id, não pelo slug,
+        // que se repete entre exercícios).
+        $proprio = $this->programa('Desenvolve Agro');
+        $this->get('/admin/programas')->assertSee('/admin/programas/'.$proprio->id.'/edit', false);
+        $this->get(EditPrograma::getUrl(['record' => $proprio]))->assertOk();
+
         // A consulta já é filtrada por secretaria: o programa nem "existe" para ele.
         $this->get(EditPrograma::getUrl(['record' => $this->programa('Merenda Escolar')]))->assertNotFound();
     }
