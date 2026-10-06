@@ -36,8 +36,12 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile(EditProfile::class)
             ->brandName('Programas Municipais · Painel')
+            ->brandLogo(asset('img/logo-prefeitura-santa-helena.png'))
+            ->darkModeBrandLogo(asset('img/logo-prefeitura-santa-helena-branco.png'))
+            ->brandLogoHeight('2.75rem')
+            ->favicon(asset('favicon.ico'))
             ->colors([
-                'primary' => Color::hex('#1d3a6b'),
+                'primary' => self::paletaPrimaria(),
             ])
             ->maxContentWidth('7xl')
             ->sidebarCollapsibleOnDesktop()
@@ -71,5 +75,24 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    /**
+     * Paleta gerada a partir do azul do site, deslocada um tom: assim o tom 600,
+     * usado nos botões, fica igual ao azul do site e aceita texto branco.
+     *
+     * @return array<int, string>
+     */
+    private static function paletaPrimaria(): array
+    {
+        $gerada = Color::hex('#0e6a9c');
+        $tons = array_keys($gerada);
+        $paleta = [];
+
+        foreach ($tons as $indice => $tom) {
+            $paleta[$tom] = $gerada[$tons[min($indice + 1, count($tons) - 1)]];
+        }
+
+        return $paleta;
     }
 }

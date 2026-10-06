@@ -7,6 +7,9 @@
     <title>{{ $titulo ? $titulo.' · ' : '' }}Programas Municipais · Santa Helena - PR</title>
     <meta name="description" content="{{ $descricao ?? 'Conheça os programas da Prefeitura de Santa Helena: quanto custam, quem atendem e como participar.' }}">
     <meta name="theme-color" content="#0e6a9c">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    <link rel="icon" href="{{ asset('img/favicon-32.png') }}" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=rubik:400,500,600,700,800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
