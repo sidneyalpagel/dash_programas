@@ -13,7 +13,7 @@
     $secretaria = $programa->secretaria;
 @endphp
 
-<x-layouts.site :titulo="$programa->nome" :descricao="$programa->descricao" :panorama="$panorama" :faixa="false">
+<x-layouts.site :titulo="$programa->nome" :descricao="$programa->descricao" :panorama="$panorama">
     <x-cabecalho-pagina :titulo="$programa->nome">
         <x-slot:trilha>
             <a href="{{ route('programas.index') }}" class="text-white/85 hover:text-white">Programas</a>

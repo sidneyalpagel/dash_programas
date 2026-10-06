@@ -19,7 +19,7 @@
     ];
 @endphp
 
-<x-layouts.site titulo="Entenda os números" :panorama="$panorama" :faixa="false">
+<x-layouts.site titulo="Entenda os números" :panorama="$panorama">
     <x-cabecalho-pagina
         titulo="Entenda os números"
         sobretitulo="Metodologia e glossário"

@@ -22,7 +22,7 @@
     ]));
 @endphp
 
-<x-layouts.site :titulo="$titulo" :panorama="$panorama" :faixa="false">
+<x-layouts.site :titulo="$titulo" :panorama="$panorama">
     <x-cabecalho-pagina :titulo="$titulo" :subtitulo="$subtitulo" :sobretitulo="'Exercício '.$panorama->exercicio">
         {{-- Perfis --}}
         <nav aria-label="Filtrar por perfil" class="mt-8">

@@ -11,20 +11,20 @@
  */
 :root {
     color-scheme: light;
-    --page: #f6f5f1;
+    --page: #f6f7f8;
     --surface: #ffffff;
-    --surface-2: #f1f0eb;
-    --ink: #15171c;
-    --ink-2: #4b4e56;
-    --muted: #767881;
-    --line: #e2e1da;
-    --brand: #1d3a6b;
-    --brand-2: #16305a;
+    --surface-2: #eef1f4;
+    --ink: #1c1f24;
+    --ink-2: #4f4f50;
+    --muted: #6f737a;
+    --line: #e1e5ea;
+    --brand: #0e6a9c;
+    --brand-2: #0b5a86;
     --brand-ink: #ffffff;
-    --gold: #c9a227;
-    --green: #1e7145;
-    --link: #1f5fae;
-    --focus: #1f5fae;
+    --accent: #1ba2e8;
+    --accent-soft: #a9dcf7;
+    --link: #0c6496;
+    --focus: #0c6496;
     --warn-bg: #fff6dc;
     --warn-ink: #6b4e00;
 
@@ -37,17 +37,17 @@
 @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme='light'])) {
         color-scheme: dark;
-        --page: #0f0f0e;
-        --surface: #1a1a19;
-        --surface-2: #242422;
-        --ink: #f4f4f2;
-        --ink-2: #c3c2b7;
-        --muted: #9a998f;
-        --line: #2f2f2c;
-        --brand: #16305a;
-        --brand-2: #10254a;
-        --link: #7fb3f0;
-        --focus: #7fb3f0;
+        --page: #0f1113;
+        --surface: #181b1e;
+        --surface-2: #22262a;
+        --ink: #f2f4f6;
+        --ink-2: #c4c9cf;
+        --muted: #959ba3;
+        --line: #2e3338;
+        --brand: #0b5a86;
+        --brand-2: #0a4f78;
+        --link: #6cc4f2;
+        --focus: #6cc4f2;
         --warn-bg: #3a2f10;
         --warn-ink: #f4d78a;
 
@@ -60,17 +60,17 @@
 
 :root[data-theme='dark'] {
     color-scheme: dark;
-    --page: #0f0f0e;
-    --surface: #1a1a19;
-    --surface-2: #242422;
-    --ink: #f4f4f2;
-    --ink-2: #c3c2b7;
-    --muted: #9a998f;
-    --line: #2f2f2c;
-    --brand: #16305a;
-    --brand-2: #10254a;
-    --link: #7fb3f0;
-    --focus: #7fb3f0;
+    --page: #0f1113;
+    --surface: #181b1e;
+    --surface-2: #22262a;
+    --ink: #f2f4f6;
+    --ink-2: #c4c9cf;
+    --muted: #959ba3;
+    --line: #2e3338;
+    --brand: #0b5a86;
+    --brand-2: #0a4f78;
+    --link: #6cc4f2;
+    --focus: #6cc4f2;
     --warn-bg: #3a2f10;
     --warn-ink: #f4d78a;
 
@@ -81,7 +81,7 @@
 }
 
 @theme inline {
-    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-sans: 'Rubik', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
     --color-page: var(--page);
     --color-surface: var(--surface);
@@ -92,7 +92,8 @@
     --color-line: var(--line);
     --color-brand: var(--brand);
     --color-brand-2: var(--brand-2);
-    --color-gold: var(--gold);
+    --color-accent: var(--accent);
+    --color-accent-soft: var(--accent-soft);
     --color-link: var(--link);
     --color-warn-bg: var(--warn-bg);
     --color-warn-ink: var(--warn-ink);
@@ -120,12 +121,12 @@
 }
 
 @layer components {
-    /* Abertura da página inicial: azul institucional com brilho discreto em verde e dourado. */
+    /* Abertura das páginas: azul do portal da Prefeitura, escurecido para o texto branco ter contraste. */
     .heroi {
         background:
-            radial-gradient(60rem 30rem at 85% -10%, rgb(201 162 39 / .28), transparent 60%),
-            radial-gradient(50rem 30rem at -10% 110%, rgb(30 113 69 / .45), transparent 60%),
-            linear-gradient(160deg, #1d3a6b 0%, #142b52 100%);
+            radial-gradient(60rem 30rem at 85% -10%, rgb(27 162 232 / .35), transparent 60%),
+            radial-gradient(50rem 30rem at -10% 110%, rgb(18 131 190 / .45), transparent 60%),
+            linear-gradient(160deg, #0e6a9c 0%, #0a4f78 100%);
     }
 
     .card {
@@ -204,9 +205,9 @@
     }
 
     .chip-claro[aria-current='true'] {
-        background: var(--gold);
-        border-color: var(--gold);
-        color: #15171c;
+        background: #ffffff;
+        border-color: #ffffff;
+        color: #0b5a86;
         font-weight: 600;
     }
 

@@ -8,7 +8,7 @@
     $maiorPrograma = $maiores->first();
 @endphp
 
-<x-layouts.site :panorama="$panorama" :faixa="false">
+<x-layouts.site :panorama="$panorama">
     {{-- Abertura ---------------------------------------------------------- --}}
     @php
         $milhoes = round($panorama->total() / 1_000_000, 1);
@@ -17,7 +17,7 @@
     <section class="heroi relative overflow-hidden text-white">
         <div class="relative mx-auto max-w-6xl px-4 pt-12 pb-14 sm:px-6 sm:pt-16 sm:pb-20">
             <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/90 ring-1 ring-white/15">
-                <span class="h-2 w-2 rounded-full bg-gold" aria-hidden="true"></span>
+                <span class="h-2 w-2 rounded-full bg-accent-soft" aria-hidden="true"></span>
                 Exercício {{ $panorama->exercicio }} · Prefeitura de Santa Helena
             </p>
 
@@ -25,7 +25,7 @@
                 <span class="block text-xl font-medium text-white/80 sm:text-2xl">A Prefeitura destinou</span>
                 <span class="mt-1 block text-[3.5rem] leading-none font-extrabold tracking-tight sm:text-8xl lg:text-9xl">
                     <x-numero-animado :valor="$milhoes" :casas="1" prefixo="R$ " />
-                    <span class="text-[0.55em] font-bold text-gold">{{ $milhoes < 2 ? 'milhão' : 'milhões' }}</span>
+                    <span class="text-[0.55em] font-bold text-accent-soft">{{ $milhoes < 2 ? 'milhão' : 'milhões' }}</span>
                 </span>
                 <span class="mt-4 block max-w-3xl text-xl leading-snug font-medium text-white/90 sm:text-2xl">
                     a <strong class="font-bold text-white">{{ $panorama->quantidade() }} programas</strong> que chegam a estudantes, famílias,
@@ -34,7 +34,7 @@
             </h1>
 
             <div class="mt-8 flex flex-wrap gap-3">
-                <a href="#para-mim" class="rounded-lg bg-gold px-5 py-3 font-semibold text-[#15171c] no-underline shadow-lg shadow-black/20 hover:brightness-105">Que programas existem para mim?</a>
+                <a href="#para-mim" class="rounded-lg bg-white px-5 py-3 font-semibold text-brand-2 no-underline shadow-lg shadow-black/20 hover:bg-[#eaf6fd]">Que programas existem para mim?</a>
                 <a href="{{ route('programas.index') }}" class="rounded-lg px-5 py-3 font-semibold text-white no-underline ring-1 ring-white/40 hover:bg-white/10">Ver todos os programas</a>
             </div>
 
@@ -66,10 +66,7 @@
                 @endif
             </div>
         </div>
-        <div class="relative flex h-1.5" aria-hidden="true">
-            <span class="flex-1 bg-[#1e7145]"></span>
-            <span class="flex-1 bg-gold"></span>
-        </div>
+        <div class="relative h-1 bg-accent" aria-hidden="true"></div>
     </section>
 
     {{-- Quem é atendido --------------------------------------------------- --}}

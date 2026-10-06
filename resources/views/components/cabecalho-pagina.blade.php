@@ -27,8 +27,5 @@
 
         {{ $slot }}
     </div>
-    <div class="relative flex h-1.5" aria-hidden="true">
-        <span class="flex-1 bg-[#1e7145]"></span>
-        <span class="flex-1 bg-gold"></span>
-    </div>
+    <div class="relative h-1 bg-accent" aria-hidden="true"></div>
 </section>
