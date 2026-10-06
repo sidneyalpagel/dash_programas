@@ -8,6 +8,8 @@
     $posicao = $panorama->posicao($programa);
     $totalComCusto = $panorama->comCusto()->count();
     $rotuloMedia = $programa->qtd_atendidos ? 'em média, por atendido, no ano' : 'em média, por benefício pago';
+    $quantidadeMedia = $programa->qtd_atendidos ?: $programa->qtd_beneficios;
+    $unidadeMedia = $programa->qtd_atendidos ? ($programa->unidade_atendidos ?: 'atendidos') : 'benefícios pagos';
     $secretaria = $programa->secretaria;
 @endphp
 
@@ -36,7 +38,7 @@
         @endif
 
         <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <x-cartao-heroi :rotulo="'destinados em '.$programa->exercicio"
+            <x-cartao-heroi :rotulo="($programa->semCustoDireto() ? 'para o Município em ' : 'destinados em ').$programa->exercicio"
                             :detalhe="match (true) {
                                 $programa->semCustoDireto() => $programa->explicacaoSemCusto(),
                                 $programa->valorPendente() => 'A secretaria responsável ainda vai informar o valor.',
@@ -62,15 +64,15 @@
                 @endif
             </x-cartao-heroi>
 
-            @if ($porAtendido)
-                <x-cartao-heroi :rotulo="$rotuloMedia" detalhe="Valor do ano dividido pela quantidade. É uma média: cada um pode receber valores diferentes.">
+            @if ($porAtendido && $quantidadeMedia > 1)
+                <x-cartao-heroi :rotulo="$rotuloMedia" :detalhe="'Valor do ano dividido por '.Formato::numero($quantidadeMedia).' '.$unidadeMedia.'. É uma média: cada um pode receber valores diferentes.'">
                     <x-numero-animado :valor="round($porAtendido)" prefixo="R$ " />
                 </x-cartao-heroi>
             @endif
 
             @if ($posicao)
                 <x-cartao-heroi :rotulo="'maior programa entre '.$totalComCusto.' com custo'"
-                                :detalhe="$fracaoTotal !== null ? Formato::percentual($fracaoTotal).' de tudo o que o Município destina aos programas' : null">
+                                :detalhe="$fracaoTotal !== null ? ($fracaoTotal < 0.001 ? 'menos de 0,1%' : Formato::percentual($fracaoTotal)).' de tudo o que o Município destina aos programas' : null">
                     <x-numero-animado :valor="$posicao" sufixo="º" />
                 </x-cartao-heroi>
             @endif
@@ -140,7 +142,7 @@
                             Aqui mostramos o total dividido por {{ $programa->vigencia_anos }}, para comparar com os demais.
                         </p>
                     @endif
-                    @if ($programa->fonte_recurso !== FonteRecurso::NaoInformado)
+                    @if (! $programa->semCustoDireto() && $programa->fonte_recurso !== FonteRecurso::NaoInformado)
                         <p class="mt-4 text-sm text-ink-2">Origem do dinheiro: <strong class="text-ink">{{ $programa->fonte_recurso->getLabel() }}</strong></p>
                     @endif
                 </section>
@@ -183,7 +185,7 @@
         @if ($relacionados->isNotEmpty())
             <section class="mt-16" aria-labelledby="relacionados">
                 <h2 id="relacionados" class="text-2xl font-bold">
-                    {{ $programa->grupo ? 'Outros benefícios do '.$programa->grupo : 'Outros programas da '.$secretaria->nome_curto }}
+                    {{ $programa->grupo ? 'Outros benefícios do '.$programa->grupo : 'Outros programas da '.$secretaria->nome }}
                 </h2>
                 <ul class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach ($relacionados as $relacionado)

@@ -467,7 +467,7 @@ class ProgramaSeeder extends Seeder
                 [
                     'nome' => 'Programa Educacional de Resistência às Drogas (PROERD)',
                     'bases_legais' => [['tipo' => 'Convênio', 'numero' => '166', 'ano' => 2022]],
-                    'ano_criacao' => 2022,
+                    'ano_criacao' => null, // 2022 é o ano do convênio com o Estado, não da criação do programa
                     'descricao' => 'Ações educativas de prevenção ao uso de drogas e à violência para alunos do 5º ano, em parceria com a Secretaria de Segurança Pública do Estado, com formatura ao final das atividades.',
                     'mecanismo' => Mecanismo::ServicoPublico,
                     'publico_alvo' => ['estudantes', 'criancas_adolescentes'],
@@ -491,7 +491,7 @@ class ProgramaSeeder extends Seeder
                 [
                     'nome' => 'Merenda Escolar',
                     'bases_legais' => [['tipo' => 'Lei Federal', 'numero' => '11.947', 'ano' => 2009]],
-                    'ano_criacao' => 2009,
+                    'ano_criacao' => null, // 2009 é a lei federal do PNAE, não a criação no Município
                     'descricao' => 'Alimentação adequada e saudável aos alunos da educação básica pública durante o período letivo, conforme diretrizes do PNAE.',
                     'mecanismo' => Mecanismo::ServicoPublico,
                     'publico_alvo' => ['estudantes', 'criancas_adolescentes'],

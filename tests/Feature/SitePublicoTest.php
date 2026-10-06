@@ -58,7 +58,23 @@ class SitePublicoTest extends TestCase
             ->assertOk()
             ->assertSee('Como funciona')
             ->assertDontSee('Como o dinheiro chega')
-            ->assertSee('O recurso é do Governo do Estado. Não há gasto direto do Município.');
+            ->assertSee('O recurso é do Governo do Estado. Não há gasto direto do Município.')
+            ->assertSee('para o Município em 2025')
+            ->assertDontSee('Origem do dinheiro');
+    }
+
+    public function test_media_informa_a_unidade_e_some_com_um_so_atendido(): void
+    {
+        $fomento = Programa::where('nome', 'Programa Municipal de Fomento ao Esporte')->first();
+        $tendas = Programa::where('nome', 'Assuntos Comunitários - Tendas')->first();
+
+        $this->get(route('programas.show', $fomento))
+            ->assertSee('Valor do ano dividido por 7 associações.')
+            ->assertSee('Outros programas da Secretaria Municipal de Esportes e Lazer');
+
+        $this->get(route('programas.show', $tendas))
+            ->assertDontSee('em média')
+            ->assertSee('menos de 0,1% de tudo');
     }
 
     public function test_valor_nao_informado_nao_aparece_como_sem_custo(): void

@@ -129,7 +129,9 @@ class Panorama
     public function destaquesAtendidos(int $quantos = 6): Collection
     {
         $comAtendidos = $this->programas
-            ->filter(fn (Programa $p) => $p->qtd_atendidos > 0)
+            ->filter(fn (Programa $p) => $p->qtd_atendidos > 0
+                && filled($p->unidade_atendidos)
+                && mb_strtolower($p->unidade_atendidos) !== 'atendidos')
             ->sortByDesc('qtd_atendidos');
 
         $umPorSecretaria = $comAtendidos->unique('secretaria_id');

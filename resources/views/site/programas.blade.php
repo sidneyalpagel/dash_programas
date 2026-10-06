@@ -11,7 +11,7 @@
 
     $totalResultado = (float) $programas->sum('valor');
     $secretariasResultado = $programas->pluck('secretaria_id')->unique()->count();
-    $comCustoResultado = $programas->filter->temCustoDireto()->count();
+    $semCustoResultado = $programas->filter->semCustoDireto()->count();
 
     $urlPerfil = fn (?string $perfil) => route('programas.index', array_filter([
         'perfil' => $perfil,
@@ -45,15 +45,15 @@
                 <x-numero-animado :valor="$programas->count()" />
             </x-cartao-heroi>
             <x-cartao-heroi rotulo="destinados no ano"
-                            :detalhe="$filtrado && $panorama->total() > 0 ? Formato::percentual($totalResultado / $panorama->total()).' do total do Município' : 'soma dos programas com custo direto'">
+                            :detalhe="($filtrado && $panorama->total() > 0 ? Formato::percentual($totalResultado / $panorama->total()).' do total do Município' : 'soma dos programas com custo direto')
+                                .($semCustoResultado ? ' · '.$semCustoResultado.' sem custo direto' : '')">
                 @if ($totalResultado >= 1_000_000)
                     <x-numero-animado :valor="round($totalResultado / 1_000_000, 1)" :casas="1" prefixo="R$ " /><span class="text-2xl font-bold sm:text-3xl"> mi</span>
                 @else
                     {{ Formato::moedaCurta($totalResultado) }}
                 @endif
             </x-cartao-heroi>
-            <x-cartao-heroi :rotulo="$secretariasResultado === 1 ? 'secretaria responsável' : 'secretarias responsáveis'"
-                            :detalhe="($programas->count() - $comCustoResultado).' sem custo direto ao Município'">
+            <x-cartao-heroi :rotulo="$secretariasResultado === 1 ? 'secretaria responsável' : 'secretarias responsáveis'">
                 <x-numero-animado :valor="$secretariasResultado" />
             </x-cartao-heroi>
         </div>

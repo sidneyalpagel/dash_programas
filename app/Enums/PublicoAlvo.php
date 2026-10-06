@@ -46,7 +46,7 @@ enum PublicoAlvo: string implements HasLabel
         return match ($this) {
             self::Estudantes => 'Sou estudante',
             self::Familias => 'Minha família precisa de apoio',
-            self::CriancasAdolescentes => 'Tenho filhos pequenos ou adolescentes',
+            self::CriancasAdolescentes => 'Para crianças e adolescentes',
             self::Idosos => 'Tenho 60 anos ou mais',
             self::Mulheres => 'Sou mulher',
             self::PessoasComDeficiencia => 'Pessoa com deficiência ou autismo',

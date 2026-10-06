@@ -43,7 +43,7 @@
                     <p class="text-5xl font-extrabold tracking-tight sm:text-6xl">
                         <x-numero-animado :valor="round($panorama->fracaoDireta() * 100, 1)" :casas="1" sufixo="%" />
                     </p>
-                    <p class="mt-2 text-base font-medium text-white/90">chega direto às pessoas</p>
+                    <p class="mt-2 text-base font-medium text-white/90">chega direto a quem é atendido</p>
                     <p class="mt-1 text-sm text-white/70">em dinheiro, bolsa ou incentivo, sem passar por obras ou serviços.</p>
                 </div>
                 <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/15 backdrop-blur-sm">
@@ -287,7 +287,7 @@
                 </li>
                 <li>
                     <p class="font-semibold text-ink">Alguns programas não têm custo direto</p>
-                    <p class="mt-1">Linhas de crédito do Estado e atendimentos feitos pela equipe contam como programa, mas não somam no valor.</p>
+                    <p class="mt-1">Alguns, como as linhas de crédito do Estado, não geram gasto direto ao Município: contam como programa, mas não somam no valor.</p>
                 </li>
                 <li>
                     <p class="font-semibold text-ink">Pessoas não são benefícios</p>

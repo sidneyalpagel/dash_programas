@@ -20,7 +20,7 @@
         </h3>
 
         @if ($programa->grupo)
-            <p class="text-sm text-muted">Parte do programa {{ $programa->grupo }}</p>
+            <p class="text-sm text-muted">Parte do {{ $programa->grupo }}</p>
         @endif
 
         @if ($programa->descricao)
