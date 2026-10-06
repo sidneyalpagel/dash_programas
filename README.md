@@ -32,7 +32,7 @@ Pendências encontradas no PDF ficaram registradas como *observação interna* n
 
 ## Desenvolvimento local
 
-Requisitos: PHP 8.3+ (o do Herd serve), Composer, Node 20+.
+Requisitos: PHP 8.4+ (o do Herd serve; o composer.lock exige 8.4), Composer, Node 20+.
 
 ```bash
 composer install
