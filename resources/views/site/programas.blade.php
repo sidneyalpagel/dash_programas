@@ -66,11 +66,7 @@
             <x-cartao-heroi rotulo="destinados no ano"
                             :detalhe="($filtrado && $panorama->total() > 0 ? Formato::percentual($totalResultado / $panorama->total()).' do total do Município' : 'soma dos programas com custo direto')
                                 .($semCustoResultado ? ' · '.$semCustoResultado.' sem custo direto' : '')">
-                @if ($totalResultado >= 1_000_000)
-                    <x-numero-animado :valor="round($totalResultado / 1_000_000, 1)" :casas="1" prefixo="R$ " /><span class="text-2xl font-bold sm:text-3xl"> mi</span>
-                @else
-                    {{ Formato::moedaCurta($totalResultado) }}
-                @endif
+                <x-moeda-animada :valor="$totalResultado" classe-unidade="text-2xl font-bold sm:text-3xl" />
             </x-cartao-heroi>
             <x-cartao-heroi :rotulo="$secretariasResultado === 1 ? 'secretaria responsável' : 'secretarias responsáveis'">
                 <x-numero-animado :valor="$secretariasResultado" />

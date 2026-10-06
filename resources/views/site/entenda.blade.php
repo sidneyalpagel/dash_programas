@@ -5,7 +5,6 @@
     $semCusto = $panorama->programas->filter->semCustoDireto();
     $comCusto = $panorama->comCusto();
     $anualizados = $panorama->programas->where('tipo_valor', TipoValor::Anualizado);
-    $milhoes = round($panorama->total() / 1_000_000, 1);
 
     $glossario = [
         'Exercício' => 'O ano a que se referem os valores. Os números deste site são do exercício '.$panorama->exercicio.'.',
@@ -26,7 +25,7 @@
         subtitulo="Como os valores são calculados, o que cada termo significa e por que alguns números não podem ser somados.">
         <div class="mt-10 grid gap-4 sm:grid-cols-3">
             <x-cartao-heroi rotulo="é o total do exercício" :detalhe="'Soma do valor no ano de '.$comCusto->count().' programas com custo direto.'">
-                <x-numero-animado :valor="$milhoes" :casas="1" prefixo="R$ " /><span class="text-2xl font-bold"> mi</span>
+                <x-moeda-animada :valor="$panorama->total()" />
             </x-cartao-heroi>
             <x-cartao-heroi rotulo="programas sem custo direto" detalhe="Contam como programa, mas não entram na soma do valor.">
                 <x-numero-animado :valor="$semCusto->count()" />

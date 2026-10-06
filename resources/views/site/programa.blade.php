@@ -48,10 +48,8 @@
                     <span class="text-3xl sm:text-4xl">Sem custo direto</span>
                 @elseif ($programa->valorPendente())
                     <span class="text-3xl">A informar</span>
-                @elseif ($programa->valor >= 1_000_000)
-                    <x-numero-animado :valor="round($programa->valor / 1_000_000, 1)" :casas="1" prefixo="R$ " /><span class="text-2xl font-bold"> mi</span>
                 @else
-                    <x-numero-animado :valor="round($programa->valor / 1_000)" prefixo="R$ " /><span class="text-2xl font-bold"> mil</span>
+                    <x-moeda-animada :valor="$programa->valor" />
                 @endif
             </x-cartao-heroi>
 

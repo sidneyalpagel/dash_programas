@@ -11,7 +11,7 @@
 <x-layouts.site :panorama="$panorama">
     {{-- Abertura ---------------------------------------------------------- --}}
     @php
-        $milhoes = round($panorama->total() / 1_000_000, 1);
+        $totalCurto = \App\Support\Formato::partesCurtas($panorama->total());
         $destaques = $panorama->destaquesAtendidos(6);
     @endphp
     <section class="heroi relative overflow-hidden text-white">
@@ -24,8 +24,8 @@
             <h1 class="mt-6">
                 <span class="block text-xl font-medium text-white/80 sm:text-2xl">A Prefeitura destinou</span>
                 <span class="mt-1 block text-[3.5rem] leading-none font-extrabold tracking-tight sm:text-8xl lg:text-9xl">
-                    <x-numero-animado :valor="$milhoes" :casas="1" prefixo="R$ " />
-                    <span class="text-[0.55em] font-bold text-accent-soft">{{ $milhoes < 2 ? 'milhão' : 'milhões' }}</span>
+                    <x-numero-animado :valor="$totalCurto['numero']" :casas="$totalCurto['casas']" prefixo="R$ " />
+                    <span class="text-[0.55em] font-bold text-accent-soft">{{ $totalCurto['unidade'] }}</span>
                 </span>
                 <span class="mt-4 block max-w-3xl text-xl leading-snug font-medium text-white/90 sm:text-2xl">
                     a <strong class="font-bold text-white">{{ $panorama->quantidade() }} programas</strong> que chegam a estudantes, famílias,
@@ -56,7 +56,7 @@
                 @if ($maiorPrograma)
                     <div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/15 backdrop-blur-sm">
                         <p class="text-5xl font-extrabold tracking-tight sm:text-6xl">
-                            <x-numero-animado :valor="round($maiorPrograma->valor / 1_000_000, 1)" :casas="1" prefixo="R$ " /><span class="text-2xl font-bold sm:text-3xl"> mi</span>
+                            <x-moeda-animada :valor="$maiorPrograma->valor" classe-unidade="text-2xl font-bold sm:text-3xl" />
                         </p>
                         <p class="mt-2 text-base font-medium text-white/90">no maior programa</p>
                         <p class="mt-1 text-sm text-white/70">

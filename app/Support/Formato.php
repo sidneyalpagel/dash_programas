@@ -17,28 +17,59 @@ class Formato
         return 'R$ '.number_format((float) $valor, $casas, ',', '.');
     }
 
-    /** Forma curta para leitura rápida: R$ 60,1 milhões, R$ 950 mil. */
-    public static function moedaCurta(float|string|null $valor): string
+    /**
+     * Forma curta para leitura rápida: R$ 60,14 milhões, R$ 1,03 milhão, R$ 950 mil.
+     * Milhões usam até duas casas (sem zeros à direita) para que a soma de valores
+     * arredondados não pareça errada: 950 mil + 1,03 milhão = 1,98 milhão.
+     */
+    public static function moedaCurta(float|string|null $valor, bool $abreviado = false): string
     {
         if ($valor === null || $valor === '') {
             return '—';
         }
 
-        $valor = (float) $valor;
+        $partes = self::partesCurtas((float) $valor);
 
-        if ($valor >= 1_000_000) {
-            $casas = $valor >= 100_000_000 ? 0 : 1;
-            $milhoes = round($valor / 1_000_000, $casas);
-            $texto = number_format($milhoes, $casas, ',', '.');
+        if ($partes['unidade'] === null) {
+            return self::moeda($valor);
+        }
 
-            return 'R$ '.$texto.' '.($milhoes < 2 ? 'milhão' : 'milhões');
+        $unidade = $abreviado ? $partes['abreviada'] : $partes['unidade'];
+
+        return 'R$ '.number_format($partes['numero'], $partes['casas'], ',', '.').' '.$unidade;
+    }
+
+    /**
+     * Número, casas decimais e unidade da forma curta. Usado também pelos números animados.
+     *
+     * @return array{numero: float, casas: int, unidade: ?string, abreviada: ?string}
+     */
+    public static function partesCurtas(float $valor): array
+    {
+        $mil = round($valor / 1_000);
+
+        if ($valor >= 1_000 && $mil < 1_000) {
+            return ['numero' => $mil, 'casas' => 0, 'unidade' => 'mil', 'abreviada' => 'mil'];
         }
 
         if ($valor >= 1_000) {
-            return 'R$ '.number_format($valor / 1_000, 0, ',', '.').' mil';
+            $maximo = $valor >= 100_000_000 ? 0 : 2;
+            $milhoes = round($valor / 1_000_000, $maximo);
+            $casas = $maximo;
+
+            while ($casas > 0 && round($milhoes, $casas - 1) == $milhoes) {
+                $casas--;
+            }
+
+            return [
+                'numero' => $milhoes,
+                'casas' => $casas,
+                'unidade' => $milhoes < 2 ? 'milhão' : 'milhões',
+                'abreviada' => 'mi',
+            ];
         }
 
-        return self::moeda($valor);
+        return ['numero' => $valor, 'casas' => 2, 'unidade' => null, 'abreviada' => null];
     }
 
     public static function numero(int|float|null $valor, int $casas = 0): string
