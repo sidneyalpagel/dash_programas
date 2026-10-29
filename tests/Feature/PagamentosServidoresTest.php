@@ -49,6 +49,12 @@ class PagamentosServidoresTest extends TestCase
         $this->get('/entenda')->assertSee('R$ 60.136.552,72')->assertSee(route('servidores'), false);
     }
 
+    public function test_menu_do_topo_tem_o_link_e_marca_a_pagina_atual(): void
+    {
+        $this->get('/')->assertSee('href="'.route('servidores').'"', false);
+        $this->get(route('servidores'))->assertSeeInOrder(['aria-current="page"', '>Servidores</a>'], false);
+    }
+
     public function test_somente_administrador_mantem_os_pagamentos(): void
     {
         Filament::setCurrentPanel('admin');

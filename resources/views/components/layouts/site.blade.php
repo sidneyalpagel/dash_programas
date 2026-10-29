@@ -51,13 +51,13 @@
             </div>
         </div>
         <div class="border-b-4 border-accent bg-[#f5f5f5] text-[#4f4f50]">
-            <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
+            <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-3 xl:gap-x-6 px-4 py-3 sm:px-6">
                 <a href="{{ route('inicio') }}" class="flex items-center gap-4 no-underline" aria-label="Início: exercício atual">
-                    <img src="{{ asset('img/logo-prefeitura-santa-helena.png') }}" alt="Prefeitura de Santa Helena" width="819" height="203" class="h-12 w-auto sm:h-14">
+                    <img src="{{ asset('img/logo-prefeitura-santa-helena.png') }}" alt="Prefeitura de Santa Helena" width="819" height="203" class="h-12 w-auto sm:h-14 lg:h-12 xl:h-14">
                     <span class="hidden border-l border-[#d4d7db] pl-4 text-lg leading-tight font-semibold text-[#0b5a86] sm:block">Programas<br>Municipais</span>
                 </a>
                 <nav aria-label="Principal">
-                    <ul class="flex flex-wrap gap-1 text-[0.9375rem] font-medium">
+                    <ul class="flex flex-wrap gap-1 text-[0.875rem] font-medium xl:text-[0.9375rem]">
                         @foreach ([
                             'inicio' => 'Início',
                             'programas.index' => 'Todos os programas',
@@ -66,12 +66,21 @@
                             <li>
                                 <a href="{{ $link($rota) }}"
                                    @class([
-                                       'block rounded-md px-3 py-2 text-[#4f4f50] no-underline hover:bg-[#1ba2e8]/10 hover:text-[#0b5a86]',
+                                       'block rounded-md px-2.5 py-2 xl:px-3 text-[#4f4f50] no-underline hover:bg-[#1ba2e8]/10 hover:text-[#0b5a86]',
                                        'bg-[#1ba2e8]/10 font-semibold text-[#0b5a86]' => $rotaAtual === $rota,
                                    ])
                                    @if ($rotaAtual === $rota) aria-current="page" @endif>{{ $rotulo }}</a>
                             </li>
                         @endforeach
+                        {{-- Fora do seletor de exercício: a página mostra todos os anos. --}}
+                        <li>
+                            <a href="{{ route('servidores') }}"
+                               @class([
+                                   'block rounded-md px-2.5 py-2 xl:px-3 text-[#4f4f50] no-underline hover:bg-[#1ba2e8]/10 hover:text-[#0b5a86]',
+                                   'bg-[#1ba2e8]/10 font-semibold text-[#0b5a86]' => $rotaAtual === 'servidores',
+                               ])
+                               title="Pagamentos a servidores" @if ($rotaAtual === 'servidores') aria-current="page" @endif>Servidores</a>
+                        </li>
                         {{-- Entrada do painel das secretarias, como no site de obras. --}}
                         <li class="ml-1.5 flex items-center">
                             <a href="{{ url('/admin') }}" class="block rounded-lg border border-[#c9d1db] bg-white px-3.5 py-2 text-[0.8125rem] font-semibold whitespace-nowrap text-[#1c1f24] no-underline hover:border-brand hover:text-[#0b5a86]">Acesso restrito</a>
