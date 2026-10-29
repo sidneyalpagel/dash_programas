@@ -13,6 +13,9 @@ $paginas = function () {
 
 Route::controller(SiteController::class)->group($paginas);
 
+// Pagamentos a servidores (RH): fora dos programas e dos seus totais.
+Route::get('/pagamentos-servidores', [SiteController::class, 'servidores'])->name('servidores');
+
 // Manual do cadastrador (página própria, imprimível; o PDF (public/arquivos) é gerado por `npm run manual`).
 Route::view('/manual', 'manual')->name('manual');
 

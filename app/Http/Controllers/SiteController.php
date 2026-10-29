@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Mecanismo;
 use App\Enums\PublicoAlvo;
+use App\Models\PagamentoServidor;
 use App\Models\Programa;
 use App\Models\Secretaria;
 use App\Support\Panorama;
@@ -124,6 +125,18 @@ class SiteController extends Controller
                 ->limit(4)
                 ->get(),
         ]);
+    }
+
+    /** Verbas pagas a servidores, agrupadas por ano (mais recente primeiro). */
+    public function servidores(): View
+    {
+        $porAno = PagamentoServidor::publicados()
+            ->orderByDesc('exercicio')
+            ->orderBy('ordem')
+            ->get()
+            ->groupBy('exercicio');
+
+        return view('site.servidores', ['porAno' => $porAno]);
     }
 
     public function entenda(Request $request): View

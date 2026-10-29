@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SecretariaSeeder::class,
             ProgramaSeeder::class,
+            PagamentoServidorSeeder::class,
         ]);
 
         // Usuários de teste, só no ambiente local. Em produção, o administrador é criado com

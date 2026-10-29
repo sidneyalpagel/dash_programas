@@ -128,6 +128,7 @@
             </div>
             <div class="sm:text-right">
                 <p><a href="{{ $link('entenda') }}">Como os números são calculados</a></p>
+                <p class="mt-2"><a href="{{ route('servidores') }}">Pagamentos a servidores</a></p>
             </div>
         </div>
     </footer>

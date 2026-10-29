@@ -113,6 +113,8 @@
                 Os valores incluem todas as fontes de recurso informadas pelas secretarias (municipal, estadual, federal e convênios).
                 Os dados retratam o exercício atual; para comparar com anos anteriores, consulte as Leis Orçamentárias Anuais (LOA)
                 no Portal da Transparência do Município.
+                Pagamentos de direitos e verbas a servidores (licença-prêmio, PDV, quinquênio, horas extras) não são programas e
+                não entram nesta soma: estão em <a href="{{ route('servidores') }}">Pagamentos a servidores</a>.
             </div>
         </section>
 

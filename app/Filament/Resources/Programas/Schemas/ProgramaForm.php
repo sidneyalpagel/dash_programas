@@ -16,7 +16,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Callout;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
@@ -259,7 +258,7 @@ class ProgramaForm
     }
 
     /** Campo de valor em reais, aceitando o formato 1.234.567,89. */
-    private static function campoMoeda(string $nome): TextInput
+    public static function campoMoeda(string $nome): TextInput
     {
         return TextInput::make($nome)
             ->prefix('R$')
