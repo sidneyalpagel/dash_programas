@@ -9,7 +9,7 @@
     <x-cabecalho-pagina
         titulo="Pagamentos a servidores"
         sobretitulo="Recursos humanos"
-        subtitulo="Direitos e verbas pagos aos servidores municipais. São despesas de pessoal e não fazem parte dos programas municipais nem dos seus totais.">
+        subtitulo="Direitos e verbas pagos aos servidores municipais.">
         @if ($destaques->isNotEmpty())
             <div class="mt-10 grid gap-4 sm:grid-cols-3">
                 @foreach ($destaques as $ano => $pagamentos)
