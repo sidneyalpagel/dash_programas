@@ -89,8 +89,9 @@
                 </nav>
             </div>
         </div>
-        {{-- Na pré-visualização de um rascunho a faixa de exercício só confundiria. --}}
-        @if (! request()->routeIs('previa.*') && (count($anos) > 1 || ($panorama && ! $panorama->ehExibido())))
+        {{-- Na pré-visualização de um rascunho a faixa de exercício só confundiria; na página inicial o seletor fica na abertura. --}}
+        @php $seletorNaPagina = $rotaAtual === 'inicio'; @endphp
+        @if (! request()->routeIs('previa.*') && ((count($anos) > 1 && ! $seletorNaPagina) || ($panorama && ! $panorama->ehExibido())))
             <div class="border-b border-line bg-surface">
                 <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 text-sm sm:px-6">
                     @if (! $panorama->ehExibido())
@@ -99,6 +100,7 @@
                             <a href="{{ $urlAno($exibido) }}" class="font-semibold text-warn-ink">Ver o atual ({{ $exibido }}) →</a>
                         </p>
                     @endif
+                    @unless ($seletorNaPagina)
                     <nav aria-label="Escolher exercício" class="flex items-center gap-2">
                         <span class="text-ink-2">Exercício:</span>
                         <ul class="flex flex-wrap gap-1">
@@ -115,6 +117,7 @@
                             @endforeach
                         </ul>
                     </nav>
+                    @endunless
                 </div>
             </div>
         @endif

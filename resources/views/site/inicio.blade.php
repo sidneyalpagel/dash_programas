@@ -16,10 +16,27 @@
     @endphp
     <section class="heroi relative overflow-hidden text-white">
         <div class="relative mx-auto max-w-6xl px-4 pt-12 pb-14 sm:px-6 sm:pt-16 sm:pb-20">
-            <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/90 ring-1 ring-white/15">
-                <span class="h-2 w-2 rounded-full bg-accent-soft" aria-hidden="true"></span>
-                Exercício {{ $panorama->exercicio }} · Prefeitura de Santa Helena
-            </p>
+            {{-- Seletor de exercício sempre visível: lista os anos com programas publicados. --}}
+            <nav aria-label="Escolher exercício" class="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <span class="inline-flex items-center gap-2 text-sm font-medium text-white/90">
+                    <span class="h-2 w-2 rounded-full bg-accent-soft" aria-hidden="true"></span>
+                    Exercício
+                </span>
+                <ul class="flex flex-wrap gap-1 rounded-full bg-white/10 p-1 ring-1 ring-white/15">
+                    @foreach (\App\Support\Panorama::exerciciosDisponiveis() as $ano)
+                        <li>
+                            <a href="{{ $ano === \App\Support\Panorama::exercicioExibido() ? route('inicio') : route('ano.inicio', ['ano' => $ano]) }}"
+                               @class([
+                                   'block rounded-full px-4 py-1.5 text-sm font-semibold no-underline tnum',
+                                   'bg-white text-brand-2 shadow-sm' => $ano === $panorama->exercicio,
+                                   'text-white/85 hover:bg-white/15 hover:text-white' => $ano !== $panorama->exercicio,
+                               ])
+                               @if ($ano === $panorama->exercicio) aria-current="true" @endif>{{ $ano }}</a>
+                        </li>
+                    @endforeach
+                </ul>
+                <span class="text-sm text-white/70">Prefeitura de Santa Helena</span>
+            </nav>
 
             <h1 class="mt-6">
                 <span class="block text-xl font-medium text-white/80 sm:text-2xl">A Prefeitura destinou</span>

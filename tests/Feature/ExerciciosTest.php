@@ -6,6 +6,7 @@ use App\Enums\StatusPrograma;
 use App\Filament\Resources\Programas\Pages\CreatePrograma;
 use App\Filament\Resources\Programas\Pages\EditPrograma;
 use App\Filament\Resources\Programas\Pages\ListProgramas;
+use App\Filament\Widgets\ResumoProgramas;
 use App\Models\Configuracao;
 use App\Models\Programa;
 use App\Models\Secretaria;
@@ -122,6 +123,25 @@ class ExerciciosTest extends TestCase
         Livewire::test(ListProgramas::class)->assertActionHidden('exercicioNoSite');
     }
 
+    public function test_pagina_inicial_sempre_mostra_o_seletor_de_exercicio(): void
+    {
+        // Só 2025 publicado: o seletor aparece mesmo assim, com o ano marcado.
+        $this->get('/')->assertOk()
+            ->assertSee('Escolher exercício', false)
+            ->assertSeeInOrder(['aria-current="true"', '>2025</a>'], false);
+
+        // Rascunho de outro ano não entra no seletor.
+        $this->programa('Educa Mais Santa Helena')->copiarPara(2026);
+        $this->get('/')->assertDontSee('href="'.url('/2026').'"', false);
+
+        $antigo = $this->programa('Educa Mais Santa Helena')->copiarPara(2024);
+        $antigo->update(['valor' => 2500000, 'status' => StatusPrograma::Publicado]);
+
+        $this->get('/2024')->assertOk()
+            ->assertSee('href="'.url('/').'"', false)
+            ->assertSeeInOrder(['aria-current="true"', '>2024</a>'], false);
+    }
+
     public function test_anos_anteriores_e_seletor(): void
     {
         $antigo = $this->programa('Educa Mais Santa Helena')->copiarPara(2024);
@@ -194,7 +214,7 @@ class ExerciciosTest extends TestCase
             ->get('/admin')
             ->assertOk();
 
-        Livewire::test(\App\Filament\Widgets\ResumoProgramas::class)
+        Livewire::test(ResumoProgramas::class)
             ->assertSee('Publicados em 2025')
             ->assertSee('R$ 60,14 milhões');
     }
