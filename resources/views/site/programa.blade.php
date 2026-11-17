@@ -64,7 +64,7 @@
                 @endif
             </x-cartao-heroi>
 
-            <x-cartao-heroi :rotulo="$programa->qtd_atendidos !== null ? ($programa->unidade_atendidos ?: 'atendidos') : 'benefícios pagos'"
+            <x-cartao-heroi :rotulo="$programa->qtd_atendidos === null && $programa->qtd_beneficios !== null ? 'benefícios pagos' : ($programa->unidade_atendidos ?: 'atendidos')"
                             :detalhe="$programa->detalhe_atendidos ?? ($programa->qtd_atendidos !== null && $programa->qtd_beneficios !== null ? Formato::numero($programa->qtd_beneficios).' benefícios pagos' : null)">
                 @if ($programa->qtd_atendidos !== null || $programa->qtd_beneficios !== null)
                     <x-numero-animado :valor="$programa->qtd_atendidos ?? $programa->qtd_beneficios" />

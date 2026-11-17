@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SecretariaSeeder::class,
             ProgramaSeeder::class,
+            RelatorioAgriculturaSeeder::class,
             PagamentoServidorSeeder::class,
         ]);
 
