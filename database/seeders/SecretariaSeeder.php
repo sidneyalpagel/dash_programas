@@ -47,6 +47,27 @@ class SecretariaSeeder extends Seeder
                 'cor' => '#2e5d8c',
                 'apresentacao' => 'Garante transporte, merenda e uniforme aos estudantes, oferece bolsas e atendimento especializado, e valoriza os artistas locais.',
             ],
+            [
+                'slug' => 'obras',
+                'nome' => 'Secretaria Municipal de Obras',
+                'nome_curto' => 'Obras',
+                'cor' => '#b5541c',
+                'apresentacao' => 'Cuida das obras públicas do Município: construção e manutenção de prédios, ruas e estradas.',
+            ],
+            [
+                'slug' => 'saude',
+                'nome' => 'Secretaria Municipal de Saúde',
+                'nome_curto' => 'Saúde',
+                'cor' => '#0f7c7a',
+                'apresentacao' => 'Cuida da saúde da população: atendimento nas unidades de saúde, medicamentos, exames, vacinação e transporte para tratamento.',
+            ],
+            [
+                'slug' => 'servicos-urbanos',
+                'nome' => 'Secretaria Municipal de Serviços Urbanos',
+                'nome_curto' => 'Serviços Urbanos',
+                'cor' => '#5b4b8a',
+                'apresentacao' => 'Cuida da cidade no dia a dia: limpeza urbana, coleta de lixo, iluminação pública, praças e jardins.',
+            ],
         ];
 
         foreach ($secretarias as $ordem => $dados) {

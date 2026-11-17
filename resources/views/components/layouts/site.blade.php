@@ -131,7 +131,8 @@
         <div class="mx-auto grid max-w-6xl gap-6 px-4 py-8 text-sm text-ink-2 sm:grid-cols-2 sm:px-6">
             <div>
                 <p class="font-semibold text-ink">Fonte dos dados</p>
-                <p class="mt-1">Informações cadastradas pelas Secretarias Municipais de Agricultura e Abastecimento Rural, Desenvolvimento Econômico, Esportes e Lazer, Assistência Social e Educação e Cultura.</p>
+                {{-- Só as secretarias com programa publicado: uma secretaria nova entra aqui quando publicar o primeiro. --}}
+                <p class="mt-1">Informações cadastradas pelas Secretarias Municipais de {{ \App\Models\Secretaria::whereHas('programas', fn ($q) => $q->publicados())->orderBy('ordem')->pluck('nome')->map(fn (string $nome) => Str::after($nome, 'Secretaria Municipal de '))->join(', ', ' e ') }}.</p>
                 @if ($panorama)
                     @if ($panorama->ultimaAtualizacao())
                         <p class="mt-2">Última atualização: {{ $panorama->ultimaAtualizacao()->format('d/m/Y') }}.</p>

@@ -39,6 +39,15 @@ class SitePublicoTest extends TestCase
         $this->get('/entenda')->assertOk();
     }
 
+    public function test_secretaria_sem_programa_publicado_fica_fora_do_site(): void
+    {
+        // Obras está cadastrada, mas ainda não publicou nada.
+        $this->get('/')->assertOk()
+            ->assertSee('Secretarias Municipais de Agricultura e Abastecimento Rural, Desenvolvimento Econômico, Esportes e Lazer, Assistência Social e Educação e Cultura.')
+            ->assertDontSee('Obras');
+        $this->get('/programas')->assertOk()->assertDontSee('Obras');
+    }
+
     public function test_ficha_explica_o_tipo_sem_citar_exemplos_de_outros_programas(): void
     {
         $fomento = Programa::where('nome', 'Programa Municipal de Fomento ao Esporte')->first();

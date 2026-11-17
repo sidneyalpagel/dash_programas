@@ -83,7 +83,8 @@ class SiteController extends Controller
             'programas' => $programas,
             'filtros' => $filtros,
             'ordem' => $ordem,
-            'secretarias' => Secretaria::all(),
+            // Só as secretarias com programa publicado no exercício: as demais dariam filtro vazio.
+            'secretarias' => Secretaria::whereIn('id', $panorama->programas->pluck('secretaria_id')->unique())->orderBy('ordem')->get(),
             'filtrado' => collect($filtros)->filter()->isNotEmpty(),
         ]);
     }
