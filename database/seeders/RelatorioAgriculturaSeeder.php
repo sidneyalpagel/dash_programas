@@ -43,7 +43,7 @@ class RelatorioAgriculturaSeeder extends Seeder
             foreach ($this->atualizacoes2025() as $slug => $dados) {
                 $programa = $this->programa(2025, $slug);
                 $programa->fill($dados);
-                $programa->acaoHistorico = 'atualizado com o relatório 2025 da Secretaria';
+                $programa->acaoHistorico = 'atualizado pelo relatório 2025';
                 $programa->save();
             }
 
@@ -56,7 +56,7 @@ class RelatorioAgriculturaSeeder extends Seeder
 
                 if ($copia) {
                     $copia->fill($dados);
-                    $copia->acaoHistorico = 'preenchido com o relatório 2026 da Secretaria';
+                    $copia->acaoHistorico = 'preenchido pelo relatório 2026';
                     $copia->save();
                 }
             }
@@ -96,7 +96,7 @@ class RelatorioAgriculturaSeeder extends Seeder
             'tipo_valor' => TipoValor::Anual,
             'status' => StatusPrograma::Rascunho,
         ]);
-        $programa->acaoHistorico = "importado do relatório {$exercicio} da Secretaria";
+        $programa->acaoHistorico = "importado do relatório {$exercicio}";
         $programa->save();
     }
 
